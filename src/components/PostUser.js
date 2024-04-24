@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
 
     contenedorOpciones: {
         width: "10%",
-        justifyContent: "center",
+        justifyContent: "start",
         alignItems: "center"
     },
 

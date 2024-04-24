@@ -51,7 +51,7 @@ const inicio_styles = StyleSheet.create({
 
     logo_inicio: {
         width: 130,
-        height: 50,
+        height: 26,
     },
 
     lupita: {
