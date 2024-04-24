@@ -1,0 +1,15 @@
+.container {
+    background-color: red !important;
+}
+
+.input {
+    height: 40px;
+    margin-bottom: 12px;
+    border-width: 1px;
+    padding: 50px;
+    border-radius: 1px;
+}
+
+.label {
+    font-weight: bold;
+}

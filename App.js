@@ -1,20 +1,45 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import Inicio from './src/components/inicio';
+import Login from './src/components/login';
+import Autenticacion from './src/components/autenticacion';
+import SignUp from './src/components/signUp';
+
+import { AuthProvider, useAuth } from './src/components/AuthContext';
+import Navegacion1 from './src/components/Navegation1';
+
+const AuthStack = createStackNavigator();
+const MainTab = createStackNavigator();
+
+
+const AppContent = () => {
+  const { autenticado } = useAuth();  // Ahora esto está en el lugar correcto
+
+  return (
+    <NavigationContainer>
+      {autenticado ? (
+        <MainTab.Navigator>
+          <MainTab.Screen name='Navegacion1' component={Navegacion1} options={{ headerShown: false }}></MainTab.Screen>
+        </MainTab.Navigator>
+      ) : (
+        <AuthStack.Navigator>
+          <AuthStack.Screen name="Auth" component={Autenticacion} options={{ headerShown: false }} />
+          <AuthStack.Screen
+            name="Login"
+            component={Login}
+            options={{ title: 'Inicia Sesión', headerTransparent: true }} />
+          <AuthStack.Screen name="SignUp" component={SignUp} options={{ title: 'Create una cuenta', headerTransparent: true }} />
+        </AuthStack.Navigator>
+      )}
+    </NavigationContainer>
+  );
+};
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
