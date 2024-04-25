@@ -5,12 +5,12 @@ export default function PostUser() {
         <View style={styles.contenedorPadre}>
             <View style={styles.contenedorImagen}>
                 <Image
-                    source={require('../../assets/Korolova.jpg')}
+                    source={require('../../assets/loboPerfil.jpg')}
                     style={styles.imagen}
                 />
             </View>
             <View style={styles.contenedorInput} >
-                <Text style={styles.textInput}>Korolova Carlson</Text>
+                <Text style={styles.textInput}>First Name Last Name</Text>
                 <Text style={styles.textInput}>1h</Text>
             </View>
             <View style={styles.contenedorOpciones} >

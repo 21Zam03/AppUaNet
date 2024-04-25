@@ -15,7 +15,7 @@ export default function UserMind() {
         <View style={styles.contenedorPadre}>
             <TouchableOpacity style={styles.contenedorImagen} onPress={handlePress1}>
                 <Image
-                source={require('../../assets/Korolova.jpg')}
+                source={require('../../assets/loboPerfil.jpg')}
                 style={styles.imagen}
                 />
             </TouchableOpacity>

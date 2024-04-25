@@ -36,7 +36,7 @@ export default function Login() {
                         />
                     </View>
                     <View style={login_styles.password_contenedor}>
-                        <Text style={login_styles.label}>Contrasena:</Text>
+                        <Text style={login_styles.label}>Contraseña:</Text>
                         <TextInput
                             style={login_styles.input}
                             value={password}
@@ -68,7 +68,7 @@ const login_styles = StyleSheet.create({
         flex: 1,
         paddingTop: 100,
         padding: 20,
-        backgroundColor: "#FFD907",
+        backgroundColor: "#FF9F43",
         gap: 15
     },
 

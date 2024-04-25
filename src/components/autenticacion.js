@@ -21,7 +21,7 @@ export default function Autenticacion() {
                     style={autenticacion_styles.logo}
                 />
                 <View style={autenticacion_styles.curve} />
-                <Text>Where we come alive</Text>
+                <Text>PASIÓN POR TU FUTURO</Text>
             </View>
             <View style={autenticacion_styles.subContenedor2}>
                 <View>
@@ -44,7 +44,7 @@ export default function Autenticacion() {
 const autenticacion_styles = StyleSheet.create({
     contenedor: {
         flex: 1,
-        backgroundColor: "#FFD907",
+        backgroundColor: "#FF9F43",
     },
 
     subContenedor1: {
@@ -90,7 +90,7 @@ const autenticacion_styles = StyleSheet.create({
     },
 
     botonIniciarSesion: {
-        backgroundColor: "#E4C515",
+        backgroundColor: "#FF8F1C",
         borderRadius: 20,
         paddingTop: 20,
         paddingBottom: 20,
