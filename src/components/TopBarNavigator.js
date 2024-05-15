@@ -14,7 +14,7 @@ export default function TopBarNavigation() {
         <Tab.Navigator
             initialRouteName="Home"
             screenOptions={{
-                tabBarActiveTintColor: '#C9DB10',
+                tabBarActiveTintColor: '#FF9F43',
                 tabBarInactiveTintColor: 'gray',
                 tabBarLabelStyle: { fontSize: 12 },
                 tabBarStyle: { 

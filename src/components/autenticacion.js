@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 
 export default function Autenticacion() {
     const navigation = useNavigation();
-    
+
     const handleLoginPress = () => {
         navigation.navigate('Login')
     }
@@ -13,28 +13,34 @@ export default function Autenticacion() {
         navigation.navigate('SignUp')
     }
 
-    return(
-        <View  style={autenticacion_styles.contenedor}>
+    return (
+        <View style={autenticacion_styles.contenedor}>
             <View style={autenticacion_styles.subContenedor1}>
-                <Image 
-                    source={require('../../assets/logo.png')}
-                    style={autenticacion_styles.logo}
-                />
+                <View style={{flexDirection: "row", justifyContent:"center", alignItems:"center"}}>
+                    <Image
+                        source={require('../../assets/logo-autonoma.png')}
+                        style={{ width: 80, height: 40 }}
+                    />
+                    <Image
+                        source={require('../../assets/logo.png')}
+                        style={autenticacion_styles.logo}
+                    />
+                </View>
                 <View style={autenticacion_styles.curve} />
-                <Text>PASIÓN POR TU FUTURO</Text>
+                <Text style={{color: "white", fontStyle: "italic"}}>Universidad Autónoma del Perú</Text>
             </View>
             <View style={autenticacion_styles.subContenedor2}>
                 <View>
                     <TouchableOpacity style={autenticacion_styles.botonRegistrate}>
-                        <Text style={{color: '#ffffff', textAlign: 'center'}} onPress={handleSignUpPress}>REGISTRATE</Text>
+                        <Text style={{ color: '#000000', textAlign: 'center' }} onPress={handleSignUpPress}>REGISTRATE</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={autenticacion_styles.iniciarSesion}>
-                    <Text style={{textAlign: 'center'}}>¿Ya eres usuario?</Text>
-                    <TouchableOpacity style={autenticacion_styles.botonIniciarSesion}  onPress={handleLoginPress}>
-                        <Text style={{color: '#ffffff', textAlign: 'center'}}>INICIAR SESIÓN</Text>
+                    <Text style={{ textAlign: 'center' }}>¿Ya eres usuario?</Text>
+                    <TouchableOpacity style={autenticacion_styles.botonIniciarSesion} onPress={handleLoginPress}>
+                        <Text style={{ color: '#ffffff', textAlign: 'center' }}>INICIAR SESIÓN</Text>
                     </TouchableOpacity>
-                    <Text style={{textAlign: "center"}}>Aplicacion dedicada para los estudiantes de la Universidad Autónoma del Perú</Text>
+                    <Text style={{ textAlign: "center" }}>Aplicacion dedicada para los estudiantes de la Universidad Autónoma del Perú</Text>
                 </View>
             </View>
         </View>
@@ -50,6 +56,7 @@ const autenticacion_styles = StyleSheet.create({
     subContenedor1: {
         flex: 0.7,
         alignItems: 'center',
+        justifyContent: "center",
         marginTop: 70,
         gap: 15,
         overflow: 'hidden', // Oculta el contenido que se desborda del contenedor
@@ -67,13 +74,13 @@ const autenticacion_styles = StyleSheet.create({
     },
 
     logo: {
-        width: 300,
-        height: 70,
+        width: 200,
+        height: 60,
         marginBottom: 0,
     },
 
     subContenedor2: {
-        flex: 0.35,
+        flex: 0.35  ,
         gap: 30,
         paddingRight: 20,
         paddingLeft: 20,
@@ -81,12 +88,13 @@ const autenticacion_styles = StyleSheet.create({
     },
 
     botonRegistrate: {
-        backgroundColor: "#000000",
+        backgroundColor: "#ffffff",
         borderRadius: 20,
         paddingTop: 20,
         paddingBottom: 20,
         paddingRight: 20,
         paddingLeft: 20,
+        borderWidth: 1
     },
 
     botonIniciarSesion: {

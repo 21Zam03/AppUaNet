@@ -43,6 +43,7 @@ const inicio_styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         paddingRight: 17,
+        paddingLeft: 4
     },
 
     contenedor2: {

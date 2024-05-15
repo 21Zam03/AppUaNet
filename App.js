@@ -14,7 +14,8 @@ const MainTab = createStackNavigator();
 
 
 const AppContent = () => {
-  const { autenticado } = useAuth();  // Ahora esto está en el lugar correcto
+
+  const {autenticado} = useAuth();
 
   return (
     <NavigationContainer>
@@ -22,14 +23,14 @@ const AppContent = () => {
         <MainTab.Navigator>
           <MainTab.Screen name='Navegacion1' component={Navegacion1} options={{ headerShown: false }}></MainTab.Screen>
         </MainTab.Navigator>
-      ) : (
+      ) : ( 
         <AuthStack.Navigator>
           <AuthStack.Screen name="Auth" component={Autenticacion} options={{ headerShown: false }} />
           <AuthStack.Screen
             name="Login"
             component={Login}
-            options={{ title: 'Inicia Sesión', headerTransparent: true }} />
-          <AuthStack.Screen name="SignUp" component={SignUp} options={{ title: 'Create una cuenta', headerTransparent: true }} />
+            options={{ title: 'Inicia Sesión', headerTransparent: true, headerShown: false}} />
+          <AuthStack.Screen name="SignUp" component={SignUp} options={{ title: 'Create una cuenta', headerTransparent: true, headerShown: false }} />
         </AuthStack.Navigator>
       )}
     </NavigationContainer>

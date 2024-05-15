@@ -1,16 +1,17 @@
 import { View, Text, StyleSheet, Image } from "react-native";
 import PostUser from "./PostUser";
 
-export default function Post() {
+export default function Post({message, photo, idStudent }) {
+    console.log("el id es: ",idStudent)
     return (
         <View style={styles.container}>
-            <PostUser />
+            <PostUser idStudent={idStudent} />
             <View style={styles.textContainer}>
-                <Text>Hola mundo asdasds sad adasd asd asd asd asd asd adasdas dasd asd assd asd asd asd as dasdas dS</Text>
+                <Text>{message}</Text>
             </View>
-            <View>
+            <View style={{width: "100%"}}>
                 <Image
-                    source={require('../../assets/postimg.jpg')}
+                    source={{ uri: `data:image/png;base64,${photo}` }}
                     style={styles.imagen}
                 />
             </View>
@@ -24,7 +25,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         paddingTop: 10,
         paddingBottom: 10,
-        borderColor: "#E7E1E0"
+        borderColor: "#E7E1E0",
     },
 
     textContainer: {
@@ -32,5 +33,10 @@ const styles = StyleSheet.create({
         paddingBottom: 10,
         paddingRight: 14,
         paddingLeft: 14,
+    }, 
+
+    imagen: {
+        width: "100%",
+        height: 400,
     }
 });
