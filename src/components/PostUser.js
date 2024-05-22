@@ -1,9 +1,14 @@
-import { View, Text, StyleSheet, Image, TextInput } from "react-native";
+import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity } from "react-native";
 import axios from 'axios';
 import { useEffect, useState } from "react";
+import { useNavigation } from '@react-navigation/native';
 
-
-export default function PostUser({idStudent}) {
+export default function PostUser({ idStudent }) {
+    const navigation = useNavigation();
+    const handlePress1 = () => {
+        navigation.navigate('Perfil')
+    };
+    
     const [student, setStudent] = useState();
     useEffect(() => {
         // Realizar la petición Axios para obtener la lista de publicaciones
@@ -17,15 +22,17 @@ export default function PostUser({idStudent}) {
                 console.error('Error al obtener al estudiante:', error);
             });
     }, []);
-    
+
     return (
         <View style={styles.contenedorPadre}>
-            <View style={styles.contenedorImagen}>
-                <Image
-                    source={require('../../assets/loboPerfil.jpg')}
-                    style={styles.imagen}
-                />
-            </View>
+            <TouchableOpacity onPress={handlePress1}>
+                <View style={styles.contenedorImagen}>
+                    <Image
+                        source={student ? { uri: `data:image/png;base64,${student.photo}` } : "No hay foto"}
+                        style={styles.imagen}
+                    />
+                </View>
+            </TouchableOpacity>
             <View style={styles.contenedorInput} >
                 <Text style={styles.textInput}>{student ? student.fullname : 'valor predeterminado'}</Text>
                 <Text style={styles.textInput}>1h</Text>
@@ -34,7 +41,6 @@ export default function PostUser({idStudent}) {
                 <Text>...</Text>
             </View>
         </View>
-
     );
 }
 

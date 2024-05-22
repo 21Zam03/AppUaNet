@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import UserMind from "./UserMind";
 import Post from "./Post";
 import axios from 'axios';
@@ -23,10 +23,12 @@ export default function Home() {
 
     return (
         <View style={home_styles.contenedorPadre}>
-            <UserMind />
-            {listPost.map(post => (
-                <Post key={post.idPost} photo={post.photo} message={post.message} idStudent={post.idStudent}/>
-            ))}
+            <ScrollView>
+                <UserMind />
+                {listPost.map(post => (
+                    <Post key={post.idPost} photo={post.photo} message={post.message} idStudent={post.idStudent}/>
+                ))}
+            </ScrollView>
         </View>
     );
 }
@@ -34,6 +36,7 @@ export default function Home() {
 const home_styles = StyleSheet.create({
     contenedorPadre: {
         flex: 1,
-        backgroundColor: "white"
+        backgroundColor: "white",
+        flexDirection: "column"
     }
 });

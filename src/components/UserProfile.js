@@ -2,8 +2,15 @@ import { useAuth } from "./AuthContext";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { useNavigation } from '@react-navigation/native';
 
 export default function UserProfile() {
+    
+    const navigation = useNavigation();
+    const handlePress1 = () => {
+        navigation.navigate('EditarPerfil')
+    };
+
     const [usuario, setUsuario] = useState(null);
     const { obtenerDatosUsuario } = useAuth();
 
@@ -60,7 +67,7 @@ export default function UserProfile() {
                     <TouchableOpacity style={user_styles.boton} >
                         <Text style={{ color: '#ffffff', textAlign: 'center', fontWeight: "bold" }}>Añadir historia</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={user_styles.boton2} >
+                    <TouchableOpacity style={user_styles.boton2} onPress={handlePress1} >
                         <Text style={{ color: 'black', textAlign: 'center', fontWeight: "bold" }}>Editar Perfil</Text>
                     </TouchableOpacity>
                 </View>

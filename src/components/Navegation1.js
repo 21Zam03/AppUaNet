@@ -6,6 +6,7 @@ import MakePost from './MakePost';
 import UserProfile from './UserProfile'
 import React, { useState, useEffect } from 'react';
 import { useAuth } from "./AuthContext";
+import EditUser from './editUser';
 
 const Looktab = createStackNavigator();
 
@@ -36,6 +37,7 @@ export default function Navegacion1() {
             <Looktab.Screen name='Postear' component={MakePost} options={{ headerTitle: "Crea una publicacion" }}></Looktab.Screen>
             <Looktab.Screen name='Perfil' component={UserProfile} options={{headerTitle: usuario ? usuario.fullname : 'No hay usuario'}}
             ></Looktab.Screen>
+            <Looktab.Screen name='EditarPerfil' component={EditUser} options={{headerTitle: "Editar perfil"}}></Looktab.Screen>
         </Looktab.Navigator>
     );
 }
