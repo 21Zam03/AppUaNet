@@ -25,6 +25,7 @@ export const AuthProvider = ({ children }) => {
                 guardarDatosUsuario(response.data.studentDTO);
                 const token = response.headers.get('authorization');
                 guardarToken(token);
+                //console.log(token);
             }
         } catch (error) {
             console.error('Error al enviar datos:', error);

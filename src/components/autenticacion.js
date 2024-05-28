@@ -10,7 +10,7 @@ export default function Autenticacion() {
     }
 
     const handleSignUpPress = () => {
-        navigation.navigate('SignUp')
+        navigation.navigate('SignUpIntro')
     }
 
     return (
@@ -31,8 +31,8 @@ export default function Autenticacion() {
             </View>
             <View style={autenticacion_styles.subContenedor2}>
                 <View>
-                    <TouchableOpacity style={autenticacion_styles.botonRegistrate}>
-                        <Text style={{ color: '#000000', textAlign: 'center' }} onPress={handleSignUpPress}>REGISTRATE</Text>
+                    <TouchableOpacity style={autenticacion_styles.botonRegistrate} onPress={handleSignUpPress}>
+                        <Text style={{ color: '#000000', textAlign: 'center' }}>UNETE</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={autenticacion_styles.iniciarSesion}>

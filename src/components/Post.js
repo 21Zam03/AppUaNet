@@ -1,9 +1,10 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import PostUser from "./PostUser";
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useState } from "react";
 
 export default function Post({ message, photo, idStudent }) {
+
     const [liked, setLiked] = useState(false);
     const handlePress = () => {
         setLiked(!liked);
@@ -14,32 +15,34 @@ export default function Post({ message, photo, idStudent }) {
             <View style={styles.textContainer}>
                 <Text>{message}</Text>
             </View>
-            <View style={{ width: "100%" }}>
-                <Image
-                    source={{ uri: `data:image/png;base64,${photo}` }}
-                    style={styles.imagen}
-                />
-            </View>
-            <View style={{flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 10}}>
+            {photo === null ? (
+                <Text></Text>
+            ) : (
+                <View style={{ width: "100%" }}>
+                    <Image
+                        source={{ uri: `data:image/png;base64,${photo}` }}
+                        style={styles.imagen}
+                    />
+                </View>
+            )}
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 10 }}>
                 <View style={{ flexDirection: "row", gap: 20, alignItems: "center" }}>
                     <TouchableOpacity onPress={handlePress} style={{ width: 30 }}>
-                        <Icon
-                            name="heart"
-                            size={30}
-                            color={liked ? '#FF9F43' : 'gray'}
-                        />
+                        <View>
+                            <Icon
+                                name={liked ? "heart" : "heart-outline"}
+                                size={25}
+                                color={liked ? "red" : "black"}
+                            />
+                        </View>
                     </TouchableOpacity>
                     <TouchableOpacity style={{ width: 30 }}>
-                        <Icon
-                            name="comment"
-                            size={30}
-                            color={'gray'}
-                        />
+                        <Icon name="comment-outline" size={23} color="#000" style={styles.icon} />
                     </TouchableOpacity>
                 </View>
                 <View>
                     <TouchableOpacity>
-                        <Text style={{color: "#7E7E7E"}}> 40 Comentarios</Text>
+                        <Text style={{ color: "#7E7E7E" }}> 40 Comentarios</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -67,4 +70,14 @@ const styles = StyleSheet.create({
         width: "100%",
         height: 400,
     },
+
+    icon: {
+
+    },
+
+    iconLiked: {
+        backgroundColor: "red",
+        borderRadius: 30,
+    }
+
 });

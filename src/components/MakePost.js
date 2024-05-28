@@ -3,11 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from "./AuthContext";
 import { TextInput } from "react-native-gesture-handler";
 import Icon from 'react-native-vector-icons/FontAwesome';
-
+import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
 
 export default function MakePost() {
+    const navigation = useNavigation();
     const [usuario, setUsuario] = useState(null);
     const { obtenerDatosUsuario } = useAuth();
+    const [messagePost, setMessagePost] = useState("");
 
     useEffect(() => {
         // Función para cargar los datos del usuario
@@ -24,9 +27,31 @@ export default function MakePost() {
         cargarDatosUsuario();
     }, []);
 
+    const handleButtonPress = async () => {
+        const formData = new FormData();
+        try {
+            formData.append("idStudent", usuario.idStudent);
+            formData.append("datePublished", "fecha");
+            formData.append("message", messagePost);
+            formData.append("photo", "");
+            const response = await axios.post('http://192.168.1.39:9000/api/posts', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    withCredentials: true,
+                },
+            });
+            if (response.data) {
+                console.log(response.data);
+                navigation.navigate('Inicio');
+            }
+        } catch (error) {
+            console.error('Error al publicar:', error);
+        }
+    };
+
     return (
         <View style={styles.contenedor}>
-            <View style={{flexDirection: "row", gap: 10, alignItems: "center"}}>
+            <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
                 <TouchableOpacity style={styles.contenedorImagen}>
                     <Image
                         source={usuario ? { uri: `data:image/png;base64,${usuario.photo}` } : "No hay foto"}
@@ -42,9 +67,9 @@ export default function MakePost() {
                     </Text>
                 </View>
             </View>
-            <View style={{height: "50%", position: "relative"}}>
-                <TextInput style={{fontSize: 20}} placeholder="What's on your mind?"></TextInput>
-                <View style={{borderColor: "gray", borderWidth: 1, borderRadius: 5, padding: 15, position: "absolute", bottom: 60, width: "100%", flexDirection: "row", gap: 20}}>
+            <View style={{ height: "50%", position: "relative" }}>
+                <TextInput style={{ fontSize: 20 }} value={messagePost} onChangeText={setMessagePost} placeholder="What's on your mind?"></TextInput>
+                <View style={{ borderColor: "gray", borderWidth: 1, borderRadius: 5, padding: 15, position: "absolute", bottom: 60, width: "100%", flexDirection: "row", gap: 20 }}>
                     <Text>Añade a tu publicación</Text>
                     <Icon name="image" size={20} color="#000" />
                     <Icon name="user" size={20} color="#000" />
@@ -52,8 +77,8 @@ export default function MakePost() {
                     <Icon name="map-marker" size={20} color="#000" />
                     <Icon name="video-camera" size={20} color="#000" />
                 </View>
-                <View style={{position: "absolute", bottom: 1, width: "100%"}}>
-                    <TouchableOpacity style={{padding: 15, backgroundColor: "#FF9F43", borderRadius: 7}}><Text style={{color: "white", textAlign: "center", fontWeight: "bold"}}>Publicar</Text></TouchableOpacity>
+                <View style={{ position: "absolute", bottom: 1, width: "100%" }}>
+                    <TouchableOpacity style={[!messagePost ? styles.botonDisabled : styles.botonEnabled]} onPress={handleButtonPress}disabled={!messagePost}><Text style={{ color: "white", textAlign: "center", fontWeight: "bold" }}>Publicar</Text></TouchableOpacity>
                 </View>
             </View>
         </View>
@@ -80,5 +105,18 @@ const styles = StyleSheet.create({
         width: 45, // Ancho del contenedor
         height: 45, // Alto del contenedor
     },
+
+    botonEnabled: {
+        padding: 15, 
+        backgroundColor: "#FF9F43", 
+        borderRadius: 7
+    },
+
+    botonDisabled: {
+        backgroundColor: "#FED77C",
+        padding: 15,
+        borderRadius: 7
+    },
+
 
 });

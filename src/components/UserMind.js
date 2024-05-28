@@ -34,12 +34,19 @@ export default function UserMind() {
     return (
         <View style={styles.contenedorPadre}>
             <TouchableOpacity style={styles.contenedorImagen} onPress={handlePress1}>
-                <Image
-                source={usuario ? { uri: `data:image/png;base64,${usuario.photo}` } : "No hay foto"}
-                style={styles.imagen}
-                />
+                {usuario && usuario.photo ? (
+                    <Image
+                        source={{ uri: `data:image/png;base64,${usuario.photo}` }}
+                        style={styles.imagen}
+                    />
+                ) : (
+                    <Image
+                        source={require('../../assets/photo-perfil.png')}
+                        style={styles.imagen}
+                    />
+                )}
             </TouchableOpacity>
-            <View style={styles.contenedorBoton} >
+            <View style={styles.contenedorBoton}>
                 <TouchableOpacity style={styles.boton} onPress={handlePress2}><Text>What's in your mind?</Text></TouchableOpacity>
             </View>
         </View>
@@ -80,5 +87,5 @@ const styles = StyleSheet.create({
         paddingBottom: 11,
         backgroundColor: "#E6E4E3"
     }
-    
+
 })

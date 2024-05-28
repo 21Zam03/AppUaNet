@@ -76,7 +76,7 @@ export default function EditUser() {
             formData.append("idUser", usuario.idUser);
             formData.append("fullname", usuario.fullname);
             formData.append("fecha_nacimiento", fechaFormateada);
-            formData.append('direccion', usuario.direccion);
+            formData.append('distrito', usuario.distrito);
             formData.append("carreraProfesional", usuario.carreraProfesional);
             formData.append('photo', {
                 uri: image,
