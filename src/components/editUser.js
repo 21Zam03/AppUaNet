@@ -118,7 +118,7 @@ export default function EditUser() {
                     <ActivityIndicator size="large" color="#FF9F43" />
                 </View>
             ) : (
-                <View style={{gap: 20}}>
+                <View style={{ gap: 20 }}>
                     <View style={styles.contenedorFotos}>
                         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                             <View>
@@ -130,22 +130,29 @@ export default function EditUser() {
                         </View>
                         <View style={{ justifyContent: "center", alignItems: "center" }}>
                             {image === null ? (
+                                usuario && usuario.photo ?  (
+                                    <Image
+                                        source={usuario ? { uri: `data:image/png;base64,${usuario.photo}` } : "no hay foto"}
+                                        style={{ width: 160, height: 160, borderRadius: 80 }}
+                                    />
+                                ) : (
+                                    <Image
+                                        source={require('../../assets/photo-perfil.png')}
+                                        style={{ width: 160, height: 160, borderRadius: 80 }}
+                                    />
+                                )
+                            ) : (
+                            image && (
+                            <View style={{ justifyContent: "center", alignItems: "center", gap: 10 }}>
                                 <Image
-                                    source={usuario ? { uri: `data:image/png;base64,${usuario.photo}` } : "no hay foto"}
+                                    source={{ uri: image }}
                                     style={{ width: 160, height: 160, borderRadius: 80 }}
                                 />
-                            ) : (
-                                image && (
-                                    <View style={{ justifyContent: "center", alignItems: "center", gap: 10 }}>
-                                        <Image
-                                            source={{ uri: image }}
-                                            style={{ width: 160, height: 160, borderRadius: 80 }}
-                                        />
-                                        <TouchableOpacity style={{ backgroundColor: "#FF9F43", width: "auto", paddingRight: 20, paddingLeft: 20, paddingTop: 5, paddingBottom: 5, borderRadius: 5 }}>
-                                            <Text style={{ color: "white" }} onPress={updateUser}>Guardar</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                )
+                                <TouchableOpacity style={{ backgroundColor: "#FF9F43", width: "auto", paddingRight: 20, paddingLeft: 20, paddingTop: 5, paddingBottom: 5, borderRadius: 5 }}>
+                                    <Text style={{ color: "white" }} onPress={updateUser}>Guardar</Text>
+                                </TouchableOpacity>
+                            </View>
+                            )
                             )}
                         </View>
                     </View>

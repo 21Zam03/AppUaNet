@@ -7,13 +7,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 export default function PostUser({ idStudent }) {
 
     const [isModalVisible, setModalVisible] = useState(false);
-
-    // Función para abrir el modal
     const openModal = () => setModalVisible(true);
-
-    // Función para cerrar el modal
     const closeModal = () => setModalVisible(false);
-
 
     const navigation = useNavigation();
     const handlePress1 = () => {
@@ -38,12 +33,21 @@ export default function PostUser({ idStudent }) {
 
         <View style={styles.contenedorPadre}>
             <TouchableOpacity onPress={handlePress1}>
-                <View style={styles.contenedorImagen}>
-                    <Image
-                        source={student ? { uri: `data:image/png;base64,${student.photo}` } : "No hay foto"}
-                        style={styles.imagen}
-                    />
-                </View>
+                {student && student.photo ? (
+                    <View style={styles.contenedorImagen}>
+                        <Image
+                            source={student ? { uri: `data:image/png;base64,${student.photo}` } : "No hay foto"}
+                            style={styles.imagen}
+                        />
+                    </View>
+                ) : (
+                    <View style={styles.contenedorImagen}>
+                        <Image
+                            source={require('../../assets/photo-perfil.png')}
+                            style={styles.imagen}
+                        />
+                    </View>
+                )}
             </TouchableOpacity>
             <View style={styles.contenedorInput} >
                 <Text style={styles.textInput}>{student ? student.fullname : 'valor predeterminado'}</Text>
@@ -51,7 +55,7 @@ export default function PostUser({ idStudent }) {
             </View>
             <View style={styles.contenedorOpciones} >
                 <TouchableOpacity onPress={openModal} style={{ padding: 8 }}>
-                    <Text>...</Text>
+                    <Icon name="ellipsis-horizontal" size={20} color="black"/>
                 </TouchableOpacity>
                 <Modal
                     transparent={true}

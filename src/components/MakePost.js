@@ -53,10 +53,17 @@ export default function MakePost() {
         <View style={styles.contenedor}>
             <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
                 <TouchableOpacity style={styles.contenedorImagen}>
-                    <Image
-                        source={usuario ? { uri: `data:image/png;base64,${usuario.photo}` } : "No hay foto"}
-                        style={styles.imagen}
-                    />
+                    {usuario && usuario.photo ? (
+                        <Image
+                            source={usuario ? { uri: `data:image/png;base64,${usuario.photo}` } : "No hay foto"}
+                            style={styles.imagen}
+                        />
+                    ) : (
+                        <Image
+                            source={require('../../assets/photo-perfil.png')}
+                            style={styles.imagen}
+                        />
+                    )}
                 </TouchableOpacity>
                 <View>
                     <Text>
@@ -78,7 +85,7 @@ export default function MakePost() {
                     <Icon name="video-camera" size={20} color="#000" />
                 </View>
                 <View style={{ position: "absolute", bottom: 1, width: "100%" }}>
-                    <TouchableOpacity style={[!messagePost ? styles.botonDisabled : styles.botonEnabled]} onPress={handleButtonPress}disabled={!messagePost}><Text style={{ color: "white", textAlign: "center", fontWeight: "bold" }}>Publicar</Text></TouchableOpacity>
+                    <TouchableOpacity style={[!messagePost ? styles.botonDisabled : styles.botonEnabled]} onPress={handleButtonPress} disabled={!messagePost}><Text style={{ color: "white", textAlign: "center", fontWeight: "bold" }}>Publicar</Text></TouchableOpacity>
                 </View>
             </View>
         </View>
@@ -107,8 +114,8 @@ const styles = StyleSheet.create({
     },
 
     botonEnabled: {
-        padding: 15, 
-        backgroundColor: "#FF9F43", 
+        padding: 15,
+        backgroundColor: "#FF9F43",
         borderRadius: 7
     },
 

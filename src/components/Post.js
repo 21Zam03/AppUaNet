@@ -1,13 +1,32 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity, Animated, Modal } from "react-native";
 import PostUser from "./PostUser";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 export default function Post({ message, photo, idStudent }) {
 
+    const [isCommentVisible, setCommentVisible] = useState(false);
+    const openComment = () => setCommentVisible(true);
+    const closeComment = () => setCommentVisible(false);
+
     const [liked, setLiked] = useState(false);
+    const scaleAnim = useRef(new Animated.Value(1)).current;
+
     const handlePress = () => {
         setLiked(!liked);
+        // Iniciar la animación
+        Animated.sequence([
+            Animated.timing(scaleAnim, {
+                toValue: 1.5,
+                duration: 100,
+                useNativeDriver: true,
+            }),
+            Animated.timing(scaleAnim, {
+                toValue: 1,
+                duration: 100,
+                useNativeDriver: true,
+            }),
+        ]).start();
     };
     return (
         <View style={styles.container}>
@@ -16,7 +35,7 @@ export default function Post({ message, photo, idStudent }) {
                 <Text>{message}</Text>
             </View>
             {photo === null ? (
-                <Text></Text>
+                <></>
             ) : (
                 <View style={{ width: "100%" }}>
                     <Image
@@ -27,18 +46,32 @@ export default function Post({ message, photo, idStudent }) {
             )}
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 10 }}>
                 <View style={{ flexDirection: "row", gap: 20, alignItems: "center" }}>
-                    <TouchableOpacity onPress={handlePress} style={{ width: 30 }}>
-                        <View>
+                    <TouchableOpacity onPress={handlePress}>
+                        <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
                             <Icon
                                 name={liked ? "heart" : "heart-outline"}
                                 size={25}
                                 color={liked ? "red" : "black"}
                             />
-                        </View>
+                        </Animated.View>
                     </TouchableOpacity>
-                    <TouchableOpacity style={{ width: 30 }}>
+                    <TouchableOpacity onPress={openComment}>
                         <Icon name="comment-outline" size={23} color="#000" style={styles.icon} />
                     </TouchableOpacity>
+                    <Modal
+                        transparent={true}
+                        visible={isCommentVisible}
+                        onRequestClose={closeComment}
+                        animationType="slide"
+                    >
+                        <View style={styles.overlay}>
+                            <View style={styles.menuContainer}>
+                                <View style={styles.menuItem}>
+                                    <Text>No hay comentarios</Text>
+                                </View>
+                            </View>
+                        </View>
+                    </Modal>
                 </View>
                 <View>
                     <TouchableOpacity>
@@ -78,6 +111,28 @@ const styles = StyleSheet.create({
     iconLiked: {
         backgroundColor: "red",
         borderRadius: 30,
-    }
+    },
+
+    overlay: {
+        //top: 45,
+        padding: 20,
+        backgroundColor: "white",
+        borderTopRightRadius: 20,
+        borderTopLeftRadius: 20,
+        flex: 1,
+    },
+
+    menuContainer: {
+        borderWidth: 1,
+        borderRadius: 10,
+        padding: 10,
+        gap: 10
+    },
+
+    menuItem: {
+        flexDirection: "row",
+        gap: 10,
+        alignItems: "center"
+    },
 
 });
