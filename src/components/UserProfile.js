@@ -1,53 +1,68 @@
 import { useAuth } from "./AuthContext";
-import { View, Text, StyleSheet, Image, TouchableOpacity, Modal } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, ScrollView } from "react-native";
 import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
+import Post from "./Post";
+import { useRoute } from '@react-navigation/native';
 
 export default function UserProfile() {
 
+    const route = useRoute();
+    const { idStudent } = route.params;
+
     const [isModalVisible, setModalVisible] = useState(false);
-
-    // Función para abrir el modal
     const openModal = () => setModalVisible(true);
-
-    // Función para cerrar el modal
     const closeModal = () => setModalVisible(false);
 
+    const [listPost, setListPost] = useState([]);
     const navigation = useNavigation();
     const handlePress1 = () => {
         navigation.navigate('EditarPerfil')
     };
 
-    const [usuario, setUsuario] = useState(null);
-    const { obtenerDatosUsuario } = useAuth();
+    const [student, setStudent] = useState();
+    useEffect(() => {
+        // Realizar la petición Axios para obtener la lista de publicaciones
+        axios.get(`http://192.168.1.39:9000/api/students/${idStudent}`)
+            .then(response => {
+                // Actualizar el estado con la lista de publicaciones recibidas
+                setStudent(response.data)
+            })
+            .catch(error => {
+                console.error('Error al obtener al estudiante:', error);
+            });
+    }, []);
 
     useEffect(() => {
-        // Función para cargar los datos del usuario
-        const cargarDatosUsuario = async () => {
-            try {
-                const usuario = await obtenerDatosUsuario();
-                setUsuario(usuario);
-            } catch (error) {
-                console.error('Error al cargar los datos del usuario:', error);
-            }
-        };
-
-        // Llamar a la función para cargar los datos del usuario cuando el componente se monte
-        cargarDatosUsuario();
-    }, []);
+        if (student) {
+            const fetchPosts = async () => {
+                try {
+                    const response = await axios.get(`http://192.168.1.39:9000/api/posts/student/${student.idStudent}`);
+                    // Ordenar los posts por fecha de publicación
+                    const sortedPosts = response.data.sort((a, b) => new Date(b.datePublished) - new Date(a.datePublished));
+                    setListPost(sortedPosts);
+                } catch (error) {
+                    console.error('Error al obtener la lista de publicaciones:', error);
+                }
+            };
+            fetchPosts();
+        }
+    }, [student]); // Este useEffect depende del `usuario`
 
     return (
         <View style={styles.contenedor}>
+            <ScrollView>
             <View style={styles.contenedorFotos}>
                 <Image
                     source={require('../../assets/portada.jpg')}
                     style={{ width: "100%", height: 210 }} />
                 <View style={styles.contenedorImagen}>
-                    {usuario && usuario.photo ? (
+                    {student && student.photo ? (
                         <TouchableOpacity onPress={openModal}>
                             <Image
-                                source={usuario ? { uri: `data:image/png;base64,${usuario.photo}` } : "No hay foto"}
+                                source={student ? { uri: `data:image/png;base64,${student.photo}` } : "No hay foto"}
                                 style={styles.imagen}
                             />
                         </TouchableOpacity>
@@ -72,9 +87,9 @@ export default function UserProfile() {
                     <View style={styles.overlay}>
                         <View style={styles.menuContainer}>
                             <View style={styles.menuItem}>
-                                {usuario && usuario.photo ? (
+                                {student && student.photo ? (
                                     <Image
-                                        source={usuario ? { uri: `data:image/png;base64,${usuario.photo}` } : "No hay foto"}
+                                        source={student ? { uri: `data:image/png;base64,${student.photo}` } : "No hay foto"}
                                         style={styles.imagen2}
                                     />
                                 ) : (
@@ -93,7 +108,7 @@ export default function UserProfile() {
                 </Modal>
             </View>
             <View style={styles.contenedorInfo}>
-                <Text style={{ fontSize: 19, fontWeight: "bold" }}>{usuario ? usuario.fullname : 'No hay usuario'}</Text>
+                <Text style={{ fontSize: 19, fontWeight: "bold" }}>{student ? student.fullname : 'No hay usuario'}</Text>
                 <View style={{ flexDirection: "row", gap: 5 }}>
                     <View>
                         <Text style={{ fontSize: 15 }}>Conexiones</Text>
@@ -104,7 +119,7 @@ export default function UserProfile() {
                 </View>
                 <View style={{ flexDirection: "row", gap: 5 }}>
                     <View>
-                        <Text>{usuario ? new Date(usuario.fecha_nacimiento).toLocaleDateString() : 'No hay usuario'}</Text>
+                        <Text>{student ? new Date(student.fecha_nacimiento).toLocaleDateString() : 'No hay usuario'}</Text>
                     </View>
                     <View>
                         <Icon name="birthday-cake" size={18} color="#4E5050" />
@@ -112,7 +127,7 @@ export default function UserProfile() {
                 </View>
                 <View style={{ flexDirection: "row", gap: 5 }}>
                     <View>
-                        <Text>{usuario ? usuario.distrito : 'No hay usuario'}</Text>
+                        <Text>{student ? student.distrito : 'No hay usuario'}</Text>
                     </View>
                     <View>
                         <Icon name="map-marker" size={18} color="#4E5050" />
@@ -120,7 +135,7 @@ export default function UserProfile() {
                 </View>
                 <View style={{ flexDirection: "row", gap: 5 }}>
                     <View>
-                        <Text>{usuario ? usuario.carreraProfesional : 'No hay usuario'}</Text>
+                        <Text>{student ? student.carreraProfesional : 'No hay usuario'}</Text>
                     </View>
                     <View>
                         <Icon name="graduation-cap" size={18} color="#4E5050" />
@@ -128,7 +143,7 @@ export default function UserProfile() {
                 </View>
                 <View style={{ flexDirection: "row", gap: 5 }}>
                     <View>
-                        <Text>{usuario ? usuario.genre : 'No hay usuario'}</Text>
+                        <Text>{student ? student.genre : 'No hay usuario'}</Text>
                     </View>
                     <View>
                         <Icon name="mars" size={18} color="blue" />
@@ -144,8 +159,11 @@ export default function UserProfile() {
                 </View>
             </View>
             <View>
-                <Text>Publicaciones</Text>
+                {listPost.map((post, index) => (
+                    <Post key={post.idPost || index} photo={post.photo} message={post.message} idStudent={post.idStudent} />
+                ))}
             </View>
+            </ScrollView>
         </View>
     );
 }

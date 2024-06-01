@@ -94,7 +94,7 @@ export default function EditUser() {
             if (response.data) {
                 eliminarDatosUsuario();
                 guardarDatosUsuario(response.data);
-                console.log(response.data);
+                //console.log(response.data);
                 //navigation.navigate('Inicio');
             }
 

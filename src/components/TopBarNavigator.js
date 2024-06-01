@@ -2,7 +2,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import Home from './Home';
-import Video from './Video';
+import News from './News';
 import FriendShip from './Friendship';
 import Notification from './Notification';
 import Account from './Account';
@@ -34,16 +34,16 @@ export default function TopBarNavigation() {
                 component={Home}
                 options={{
                     tabBarIcon: ({ color, size }) => (
-                        <Icon name="home" color={color} size={30} />
+                        <Icon name="home" color={color} size={25} />
                     ),
                 }}
             />
             <Tab.Screen
-                name="Video"
-                component={Video}
+                name="News"
+                component={News}
                 options={{
                     tabBarIcon: ({ color, size }) => (
-                        <Icon name="play-circle" color={color} size={25} />
+                        <Icon name="newspaper-o" color={color} size={20} />
                     ),
                 }}
             />
@@ -52,7 +52,7 @@ export default function TopBarNavigation() {
                 component={FriendShip}
                 options={{
                     tabBarIcon: ({ color, size }) => (
-                        <Icon name="user-plus" color={color} size={25} />
+                        <Icon name="user-plus" color={color} size={22} />
                     ),
                 }}
             />
@@ -62,6 +62,15 @@ export default function TopBarNavigation() {
                 options={{
                     tabBarIcon: ({ color, size }) => (
                         <Icon name="bell" color={color} size={22} />
+                    ),
+                }}
+            />
+            <Tab.Screen
+                name="Account"
+                component={Account}
+                options={{
+                    tabBarIcon: ({ color, size }) => (
+                        <Icon name="user" color={color} size={22} />
                     ),
                 }}
             />

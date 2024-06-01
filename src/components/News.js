@@ -5,8 +5,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from "react";
 import { useFocusEffect } from '@react-navigation/native';
 
-export default function Home() {
-
+export default function News () {
     const [listPost, setListPost] = useState([]);
 
     const fetchPosts = async () => {
@@ -14,8 +13,8 @@ export default function Home() {
             const response = await axios.get('http://192.168.1.39:9000/api/posts');
             const sortedPosts = response.data.sort((a, b) => new Date(b.datePublished) - new Date(a.datePublished));
 
-            const postsDiversion = sortedPosts.filter(post => post.tipo === "Diversion");
-            setListPost(postsDiversion);
+            const postsInformativo = sortedPosts.filter(post => post.tipo === "Informativo");
+            setListPost(postsInformativo);
         } catch (error) {
             console.error('Error al obtener la lista de publicaciones:', error);
         }
@@ -30,7 +29,6 @@ export default function Home() {
     return (
         <View style={home_styles.contenedorPadre}>
             <ScrollView>
-                <UserMind />
                 {listPost.map(post => (
                     <Post key={post.idPost} idPost={post.idPost} photo={post.photo} message={post.message} idStudent={post.idStudent} likes={post.likes} date={post.datePublished} type={post.tipo}/>
                 ))}

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-export default function PostUser({ idStudent }) {
+export default function PostUser({ idStudent, idPost }) {
 
     const [isModalVisible, setModalVisible] = useState(false);
     const openModal = () => setModalVisible(true);
@@ -12,7 +12,9 @@ export default function PostUser({ idStudent }) {
 
     const navigation = useNavigation();
     const handlePress1 = () => {
-        navigation.navigate('Perfil')
+        navigation.navigate('Perfil', {
+            idStudent: idStudent,
+        })
     };
 
     const [student, setStudent] = useState();
@@ -21,7 +23,6 @@ export default function PostUser({ idStudent }) {
         axios.get(`http://192.168.1.39:9000/api/students/${idStudent}`)
             .then(response => {
                 // Actualizar el estado con la lista de publicaciones recibidas
-                console.log("Se obtuvo al estudiante")
                 setStudent(response.data)
             })
             .catch(error => {
@@ -29,8 +30,20 @@ export default function PostUser({ idStudent }) {
             });
     }, []);
 
+    const deletePost = async () => {
+        try {
+            const response = await axios.delete(`http://192.168.1.39:9000/api/posts/${idPost}`);
+            if (response.data) {
+                closeModal();
+                console.log("Publicacion eliminada: ",idPost);
+                navigation.navigate('Inicio');
+            }
+        } catch (error) {
+            console.error('Error al tratar de eliminar la publicacion:', error);
+        }
+    };
+    
     return (
-
         <View style={styles.contenedorPadre}>
             <TouchableOpacity onPress={handlePress1}>
                 {student && student.photo ? (
@@ -87,7 +100,7 @@ export default function PostUser({ idStudent }) {
                                     <Text style={styles.menuItemText}>Copie el link y compartalo con amigos</Text>
                                 </View>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.menuItem} onPress={() => { /* Otras funciones */ closeModal(); }}>
+                            <TouchableOpacity style={styles.menuItem} onPress={deletePost}>
                                 <View>
                                     <Icon name="trash" size={26} color="black" />
                                 </View>
@@ -138,19 +151,22 @@ const styles = StyleSheet.create({
     },
 
     overlay: {
-        //top: 45,
-        padding: 20,
-        backgroundColor: "#F3F1EC",
-        borderTopRightRadius: 20,
-        borderTopLeftRadius: 20,
         flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.2)',
+        padding: 0
     },
 
     menuContainer: {
+        position: "absolute",
+        bottom: 0,
         backgroundColor: "white",
-        borderRadius: 10,
-        padding: 10,
-        gap: 10
+        borderTopRightRadius: 20,
+        borderTopLeftRadius: 20,
+        padding: 15,
+        gap: 15,
+        width: "100%"
     },
 
     menuItem: {

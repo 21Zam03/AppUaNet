@@ -4,18 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from "./AuthContext";
 
 export default function UserMind() {
-    const navigation = useNavigation();
-    const handlePress1 = () => {
-        navigation.navigate('Perfil')
-    };
-
-    const handlePress2 = () => {
-        navigation.navigate('Postear')
-    };
-
-    const [usuario, setUsuario] = useState(null);
-    const { obtenerDatosUsuario } = useAuth();
-
+    
     useEffect(() => {
         // Función para cargar los datos del usuario
         const cargarDatosUsuario = async () => {
@@ -30,6 +19,22 @@ export default function UserMind() {
         // Llamar a la función para cargar los datos del usuario cuando el componente se monte
         cargarDatosUsuario();
     }, []);
+
+
+    const navigation = useNavigation();
+
+    const handlePress1 = () => {
+        navigation.navigate('Perfil', {
+            idStudent: usuario.idStudent,
+        })
+    };
+
+    const handlePress2 = () => {
+        navigation.navigate('Postear')
+    };
+
+    const [usuario, setUsuario] = useState(null);
+    const { obtenerDatosUsuario } = useAuth();
 
     return (
         <View style={styles.contenedorPadre}>
