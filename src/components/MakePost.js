@@ -7,6 +7,7 @@ import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import ModalSelector from 'react-native-modal-selector';
+import { Video } from 'expo-av';
 
 export default function MakePost() {
     const navigation = useNavigation();
@@ -39,13 +40,21 @@ export default function MakePost() {
     }, []);
 
     const handleButtonPress = async () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const formattedDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
         const formData = new FormData();
         try {
             formData.append("idStudent", usuario.idStudent);
-            formData.append("datePublished", "fecha");
             formData.append("message", messagePost);
-            formData.append("likes", "0");
+            formData.append("likes", JSON.stringify([]));
             formData.append("type", selectedItem);
+            formData.append("datePublished", formattedDateTime);
             if (image != null) {
                 formData.append('photo', {
                     uri: image,
@@ -62,7 +71,7 @@ export default function MakePost() {
                 },
             });
             if (response.data) {
-                console.log(response.data.tipo);
+                console.log(response.data);
                 navigation.navigate('Inicio');
             }
         } catch (error) {
@@ -74,18 +83,36 @@ export default function MakePost() {
     const pickImage = async () => {
         // No permissions request is necessary for launching the image library
         let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
-            aspect: [4, 3],
-            quality: 1,
+            aspect: [5, 5],
+            quality: 0.5,
         });
         //console.log(result);
         if (!result.cancelled) {
+            console.log("Tamaño del imagen (en bytes):", result.assets[0].fileSize);
             // Verificar si hay elementos en la matriz assets antes de acceder a la URI
             if (result.assets && result.assets.length > 0) {
                 setImage(result.assets[0].uri);
-            } else {
-                console.error('La matriz "assets" está vacía.');
+            }
+        }
+    };
+
+    const [video, setVideo] = useState(null);
+    const pickVideo = async () => {
+        // No permissions request is necessary for launching the image library
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+            allowsEditing: true,
+            //aspect: [5, 5],
+            quality: 0.5,
+        });
+        //console.log(result);
+        if (!result.cancelled) {
+            console.log("Tamaño del video (en bytes):", result.assets[0].fileSize);
+            // Verificar si hay elementos en la matriz assets antes de acceder a la URI
+            if (result.assets && result.assets.length > 0) {
+                setVideo(result.assets[0].uri);
             }
         }
     };
@@ -120,19 +147,30 @@ export default function MakePost() {
                     style={{ fontSize: 20 }}
                     value={messagePost}
                     onChangeText={setMessagePost}
-                    placeholder="What's on your mind?">
+                    placeholder="What's on your mind?"
+                    autoFocus={true}
+                >
                 </TextInput>
                 <View style={{}}>
-                    {image === null ? (
+                    {image === null && video === null ? (
                         <></>
                     ) : (
-                        image && (
+                        image != null && video === null? (
                             <View style={{ justifyContent: "center", alignItems: "center", gap: 10 }}>
                                 <Image
                                     source={{ uri: image }}
                                     style={{ width: "100%", height: "100%" }}
                                 />
                             </View>
+                        ) :  (
+                            video && (
+                                <Video
+                                  source={{ uri: video }}
+                                  style={styles.video}
+                                  useNativeControls
+                                  resizeMode="contain"
+                                />    
+                            )
                         )
                     )}
                 </View>
@@ -140,26 +178,26 @@ export default function MakePost() {
                     <View style={{ borderColor: "gray", borderWidth: 1, borderRadius: 5, padding: 15, width: "100%", flexDirection: "row", gap: 20 }}>
                         <Text>Añade a tu publicación</Text>
                         <TouchableOpacity onPress={pickImage}><Icon name="image" size={20} color="blue" /></TouchableOpacity>
+                        <TouchableOpacity onPress={pickVideo}><Icon name="video-camera" size={20} color="#79A4F9" /></TouchableOpacity>
                         <Icon name="user" size={20} color="green" />
                         <Icon name="smile-o" size={20} color="#E8F979" />
                         <Icon name="map-marker" size={20} color="red" />
-                        <Icon name="video-camera" size={20} color="#79A4F9" />
                     </View>
-                    <View style={{justifyContent: 'center', alignItems: 'start'}}>
+                    <View style={{ justifyContent: 'center', alignItems: 'start' }}>
                         <ModalSelector
                             data={data}
                             initValue="Select an option"
                             onChange={(option) => setSelectedItem(option.label)}
                             selectStyle={{ backgroundColor: 'black' }}
-                            optionTextStyle={{color: "white"}}
+                            optionTextStyle={{ color: "white" }}
                         >
-                            <TouchableOpacity style={{padding: 8, borderWidth: 1, borderColor: 'black', borderRadius: 5}}>
-                                <Text style={{textAlign: "center"}}>{selectedItem || 'Eliga una opcion'}</Text>
+                            <TouchableOpacity style={{ padding: 8, borderWidth: 1, borderColor: 'black', borderRadius: 5 }}>
+                                <Text style={{ textAlign: "center" }}>{selectedItem || 'Eliga una opcion'}</Text>
                             </TouchableOpacity>
                         </ModalSelector>
                     </View>
                     <View style={{ position: "", bottom: 1, width: "100%" }}>
-                        <TouchableOpacity style={[!messagePost && !image ? styles.botonDisabled : styles.botonEnabled]} onPress={handleButtonPress} disabled={!messagePost && !image}><Text style={{ color: "white", textAlign: "center", fontWeight: "bold" }}>Publicar</Text></TouchableOpacity>
+                        <TouchableOpacity style={[!messagePost && !image && !video ? styles.botonDisabled : styles.botonEnabled]} onPress={handleButtonPress} disabled={!messagePost && !image && !video}><Text style={{ color: "white", textAlign: "center", fontWeight: "bold" }}>Publicar</Text></TouchableOpacity>
                     </View>
                 </View>
 
@@ -200,6 +238,9 @@ const styles = StyleSheet.create({
         padding: 15,
         borderRadius: 7
     },
-
-
+    video: {
+        width: '100%',
+        height: "100%",
+        backgroundColor: "white",
+    },
 });

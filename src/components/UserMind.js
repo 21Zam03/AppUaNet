@@ -52,7 +52,7 @@ export default function UserMind() {
                 )}
             </TouchableOpacity>
             <View style={styles.contenedorBoton}>
-                <TouchableOpacity style={styles.boton} onPress={handlePress2}><Text>What's in your mind?</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.boton} onPress={handlePress2}><Text>¿Que tienes en mente?</Text></TouchableOpacity>
             </View>
         </View>
     );
@@ -65,7 +65,10 @@ const styles = StyleSheet.create({
         gap: 14,
         justifyContent: "center",
         alignItems: "center",
-        marginTop: 10
+        paddingTop: 14,
+        paddingBottom: 14,
+        paddingLeft: 0,
+        paddingRight: 0
     },
 
     contenedorImagen: {
@@ -85,12 +88,13 @@ const styles = StyleSheet.create({
     },
 
     boton: {
-        borderRadius: 30,
+        borderRadius: 40,
         paddingRight: 15,
         paddingLeft: 15,
-        paddingTop: 11,
-        paddingBottom: 11,
-        backgroundColor: "#E6E4E3"
+        paddingTop: 10,
+        paddingBottom: 10,
+        borderColor: "#C9CFCE",
+        borderWidth: 1
     }
 
 })

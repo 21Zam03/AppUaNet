@@ -36,7 +36,7 @@ export default function SignUpCode() {
         const code = confirmationCode.join('');
         if (code === "12345") {
             clearInterval(intervalRef.current);
-            navigation.navigate('SignUpPassword')
+            navigation.navigate('SignUpNickname')
         } else {
             setMessage(true)
             console.log("Codigo de confirmacion incorrecta")

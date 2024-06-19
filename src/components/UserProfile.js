@@ -4,27 +4,22 @@ import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
-import Post from "./Post";
 import { useRoute } from '@react-navigation/native';
 
 export default function UserProfile() {
+    const [reloadComponent, setReloadComponent] = useState(false);
 
-    const route = useRoute();
-    const { idStudent } = route.params;
-
-    const [isModalVisible, setModalVisible] = useState(false);
-    const openModal = () => setModalVisible(true);
-    const closeModal = () => setModalVisible(false);
-
-    const [listPost, setListPost] = useState([]);
+    //Logica para el useNavigation
     const navigation = useNavigation();
     const handlePress1 = () => {
         navigation.navigate('EditarPerfil')
     };
 
-    const [student, setStudent] = useState();
+    //Logica para obtener el estudiante a ver en el perfil
+    const route = useRoute();
+    const { idStudent } = route.params;
+    const [student, setStudent] = useState(null);
     useEffect(() => {
-        // Realizar la petición Axios para obtener la lista de publicaciones
         axios.get(`http://192.168.1.39:9000/api/students/${idStudent}`)
             .then(response => {
                 // Actualizar el estado con la lista de publicaciones recibidas
@@ -35,6 +30,14 @@ export default function UserProfile() {
             });
     }, []);
 
+    //Logica para ver el modal o no
+    const [isModalVisible, setModalVisible] = useState(false);
+    const openModal = () => setModalVisible(true);
+    const closeModal = () => setModalVisible(false);
+
+    //Logica para obtener las publicaciones del usuario
+    const [listPost, setListPost] = useState([]);
+    const [likesTotal, setLikesTotal] = useState();
     useEffect(() => {
         if (student) {
             const fetchPosts = async () => {
@@ -43,6 +46,8 @@ export default function UserProfile() {
                     // Ordenar los posts por fecha de publicación
                     const sortedPosts = response.data.sort((a, b) => new Date(b.datePublished) - new Date(a.datePublished));
                     setListPost(sortedPosts);
+                    const totalLikes = sortedPosts.reduce((acc, post) => acc + post.likes.length, 0);
+                    setLikesTotal(totalLikes);
                 } catch (error) {
                     console.error('Error al obtener la lista de publicaciones:', error);
                 }
@@ -51,118 +56,333 @@ export default function UserProfile() {
         }
     }, [student]); // Este useEffect depende del `usuario`
 
+    //Logica para obtener el usuario del assynStorage
+    const { obtenerDatosUsuario } = useAuth();
+    const [studentTest, setStudentTest] = useState(null);
+    useEffect(() => {
+        const cargarDatosUsuario = async () => {
+            const datosUsuario = await obtenerDatosUsuario();
+            setStudentTest(datosUsuario);
+        };
+        cargarDatosUsuario();
+    }, []);
+
+    //Logica para el boton de enviar solicitud
+    const [bontonSolicitud, setBotonSolicitud] = useState(false);
+    const botonSolicitudAction = async () => {
+        setBotonSolicitud(!bontonSolicitud);
+        const friend = {
+            userId1: studentTest.idStudent,
+            userId2: student.idStudent,
+            status: "Pendiente"
+        };
+        try {
+            const response = await axios.post('http://192.168.1.39:9000/api/friends', friend, {
+                withCredentials: true,
+            });
+            if (response.data) {
+                console.log(response.data);
+                setReloadComponent(prevState => !prevState);
+            }
+        } catch (error) {
+            console.error('Error al enviar datos:', error);
+        }
+    }
+
+    const botonSolicitudActionNo = async () => {
+        setBotonSolicitud(!bontonSolicitud);
+        try {
+            const response = await axios.delete(`http://192.168.1.39:9000/api/friends/${relationInfo.idFriend}`);
+            if (response.data) {
+                console.log(response.data);
+            }
+        } catch (error) {
+            console.error('Error al enviar datos:', error);
+        }
+    }
+
+    //Lista de solicitudes de amistades enviadas
+    const [relationInfo, setRelationInfo] = useState();
+    const [relation, setRelation] = useState(false);
+    const [relation2, setRelation2] = useState(false);
+    useEffect(() => {
+        if (student) {
+            if (studentTest.idStudent != student.idStudent) {
+                const fetchPosts = async () => {
+                    try {
+                        const response = await axios.get(`http://192.168.1.39:9000/api/friends/listFriends/${studentTest.idStudent}/${student.idStudent}`);
+                        if (response.data.idFriend) {
+                            setRelation(true);
+                            setRelationInfo(response.data);
+                        } else {
+                            comprobacion();
+                        }
+                    } catch (error) {
+                        console.error('Error al obtener la lista de friends del usuario1:', error);
+                    }
+                };
+                fetchPosts();
+            }
+        }
+    }, [student, reloadComponent]);
+
+    const comprobacion = async () => {
+        try {
+            const response = await axios.get(`http://192.168.1.39:9000/api/friends/listFriends/${student.idStudent}/${studentTest.idStudent}`);
+            if (response.data.idFriend) {
+                setRelationInfo(response.data);
+                setRelation2(true);
+            }
+        } catch (error) {
+            console.error('Error al obtener la lista de friends del usuario2:', error);
+        }
+    }
+
     return (
         <View style={styles.contenedor}>
             <ScrollView>
-            <View style={styles.contenedorFotos}>
-                <Image
-                    source={require('../../assets/portada.jpg')}
-                    style={{ width: "100%", height: 210 }} />
-                <View style={styles.contenedorImagen}>
-                    {student && student.photo ? (
-                        <TouchableOpacity onPress={openModal}>
-                            <Image
-                                source={student ? { uri: `data:image/png;base64,${student.photo}` } : "No hay foto"}
-                                style={styles.imagen}
-                            />
-                        </TouchableOpacity>
-                    ) : (
-                        <TouchableOpacity onPress={openModal}>
-                            <Image
-                                source={require('../../assets/photo-perfil.png')}
-                                style={styles.imagen}
-                            />
-                        </TouchableOpacity>
-                    )}
-                </View>
-                <View style={styles.contenedorEdicion}>
-                    <TouchableOpacity onPress={openModal}><Icon name="camera" size={20} color="#4E5050" /></TouchableOpacity>
-                </View>
-                <Modal
-                    transparent={true}
-                    visible={isModalVisible}
-                    onRequestClose={closeModal}
-                    animationType="fade"
-                >
-                    <View style={styles.overlay}>
-                        <View style={styles.menuContainer}>
-                            <View style={styles.menuItem}>
-                                {student && student.photo ? (
+                <View style={styles.contenedorFotos}>
+                    <View style={styles.contenedorImagen}>
+                        {student && student.photo ? (
+                            <View>
+                                <TouchableOpacity onPress={openModal}>
                                     <Image
                                         source={student ? { uri: `data:image/png;base64,${student.photo}` } : "No hay foto"}
-                                        style={styles.imagen2}
+                                        style={styles.imagen}
                                     />
-                                ) : (
+                                </TouchableOpacity>
+                                <TouchableOpacity>
+                                    <View style={{ position: "absolute", bottom: 0, right: 0, backgroundColor: "white", width: 32, height: 32, borderRadius: 50, justifyContent: "center", alignItems: "center" }}>
+                                        <Icon name="plus-circle" size={28} color="#7DB6F3" />
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                        ) : (
+                            <View>
+                                <TouchableOpacity onPress={openModal}>
                                     <Image
                                         source={require('../../assets/photo-perfil.png')}
-                                        style={styles.imagen2}
+                                        style={styles.imagen}
                                     />
-                                )}
+                                </TouchableOpacity>
+                                <TouchableOpacity>
+                                    <View style={{ position: "absolute", bottom: 0, right: 0, backgroundColor: "white", width: 32, height: 32, borderRadius: 50, justifyContent: "center", alignItems: "center" }}>
+                                        <Icon name="plus-circle" size={28} color="#7DB6F3" />
+                                    </View>
+                                </TouchableOpacity>
                             </View>
-                            <View style={[styles.menuItem, { padding: 10, flexDirection: "row", gap: 10 }]}>
-                                <TouchableOpacity style={{ backgroundColor: "#FF9F43", padding: 10, borderRadius: 10, flex: 0.5 }}><Text style={{ color: "white", textAlign: "center" }}>Cambiar foto</Text></TouchableOpacity>
-                                <TouchableOpacity style={{ backgroundColor: "#FF9F43", padding: 10, borderRadius: 10, flex: 0.5 }}><Text style={{ color: "white", textAlign: "center" }}>Eliminar foto</Text></TouchableOpacity>
-                            </View>
+                        )}
+                    </View>
+                    <View style={{ justifyContent: "center", alignItems: "center" }}>
+                        <Text style={{ fontSize: 15, color: "gray" }}>{student ? "@" + student.nickname : '@nickname'}</Text>
+                    </View>
+                    <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 45 }}>
+                        <View style={{ justifyContent: "center", alignItems: "center" }}>
+                            <Text style={{ fontSize: 15, fontWeight: "bold" }}>{listPost.length}</Text>
+                            <Text style={{ fontSize: 15 }}>Posts</Text>
+                        </View>
+                        <View style={{ justifyContent: "center", alignItems: "center" }}>
+                            <Text style={{ fontSize: 15, fontWeight: "bold" }}>10</Text>
+                            <Text style={{ fontSize: 15 }}>Friends</Text>
+                        </View>
+                        <View style={{ justifyContent: "center", alignItems: "center" }}>
+                            <Text style={{ fontSize: 15, fontWeight: "bold" }}>{likesTotal}</Text>
+                            <Text style={{ fontSize: 15 }}>likes</Text>
                         </View>
                     </View>
-                </Modal>
-            </View>
-            <View style={styles.contenedorInfo}>
-                <Text style={{ fontSize: 19, fontWeight: "bold" }}>{student ? student.fullname : 'No hay usuario'}</Text>
-                <View style={{ flexDirection: "row", gap: 5 }}>
+                    {
+                        studentTest && student ? (
+                            studentTest.idStudent === student.idStudent ? (
+                                <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10 }}>
+                                    <View style={{ justifyContent: "center", alignItems: "center" }}>
+                                        <TouchableOpacity style={{ backgroundColor: "#E7F0EE", paddingTop: 12, paddingBottom: 12, paddingRight: 20, paddingLeft: 20, borderRadius: 6 }} onPress={handlePress1}>
+                                            <Text style={{ textAlign: "center" }}>Editar Perfil</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                    <View style={{ justifyContent: "center", alignItems: "center" }}>
+                                        <TouchableOpacity style={{ backgroundColor: "#E7F0EE", paddingTop: 12, paddingBottom: 12, paddingRight: 20, paddingLeft: 20, borderRadius: 6 }}>
+                                            <Text style={{ textAlign: "center" }}>Compartir Perfil</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            ) : (
+                                <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10 }}>
+                                    <View style={{ justifyContent: "center", alignItems: "center" }}>
+                                        {
+                                            relation ? (
+                                                relationInfo ? (
+                                                    relationInfo.status === "Pendiente" ? (
+                                                        <TouchableOpacity style={[!bontonSolicitud ? styles.botonSolicitudSi : styles.botonSolicitudNo]} onPress={botonSolicitudActionNo}>
+                                                            <Text style={[!bontonSolicitud ? styles.textSolicitudSi : styles.textSolicitudNo]}>Cancelar Solicitud
+                                                            </Text>
+                                                        </TouchableOpacity>
+                                                    ) : (
+                                                        <TouchableOpacity style={styles.botonSolicitudSi} onPress={botonSolicitudActionNo}>
+                                                            <Text style={styles.textSolicitudSi}>Eliminar Amistad
+                                                            </Text>
+                                                        </TouchableOpacity>
+                                                    )
+                                                ) : (
+                                                    <></>
+                                                )
+                                            ) : (
+                                                relation2 ? (
+                                                    <TouchableOpacity style={[!bontonSolicitud ? styles.botonSolicitudNo : styles.botonSolicitudSi]} onPress={botonSolicitudActionNo}>
+                                                        <Text style={[!bontonSolicitud ? styles.textSolicitudNo : styles.textSolicitudSi]}>Rechazar Solicitud
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                ) : (
+                                                    <TouchableOpacity style={[!bontonSolicitud ? styles.botonSolicitudNo : styles.botonSolicitudSi]} onPress={botonSolicitudAction}>
+                                                        <Text style={[!bontonSolicitud ? styles.textSolicitudNo : styles.textSolicitudSi]}>Enviar Solicitud
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                )
+                                            )
+                                        }
+                                    </View>
+                                    <View style={{ justifyContent: "center", alignItems: "center" }}>
+                                        <TouchableOpacity style={{ backgroundColor: "#E7F0EE", paddingTop: 12, paddingBottom: 12, paddingRight: 20, paddingLeft: 20, borderRadius: 6 }}>
+                                            <Text style={{ textAlign: "center" }}>Mensaje</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            )
+                        ) : (
+                            <View><Text>Cargando.....</Text></View>
+                        )
+                    }
                     <View>
-                        <Text style={{ fontSize: 15 }}>Conexiones</Text>
+                        <View style={{ justifyContent: "center", alignItems: "center", width: "40%", padding: 0, paddingBottom: 20 }}>
+                            <Text style={{ textAlign: "center", lineHeight: 20 }}>{student ? student.biografia : "Cargando..."}</Text>
+                        </View>
                     </View>
+                    <Modal
+                        transparent={true}
+                        visible={isModalVisible}
+                        onRequestClose={closeModal}
+                        animationType="fade"
+                    >
+                        <View style={styles.overlay}>
+                            <View style={styles.menuContainer}>
+                                <View style={styles.menuItem}>
+                                    {student && student.photo ? (
+                                        <Image
+                                            source={student ? { uri: `data:image/png;base64,${student.photo}` } : "No hay foto"}
+                                            style={styles.imagen2}
+                                        />
+                                    ) : (
+                                        <Image
+                                            source={require('../../assets/photo-perfil.png')}
+                                            style={styles.imagen2}
+                                        />
+                                    )}
+                                </View>
+                            </View>
+                        </View>
+                    </Modal>
+                </View>
+                <View style={styles.contenedorInfo}>
                     <View>
-                        <Text style={{ fontSize: 15, fontWeight: "bold" }}>385</Text>
+                        <Text style={{ fontSize: 21, fontWeight: "bold" }}>Información</Text>
+                    </View>
+                    <View style={{ flexDirection: "row" }}>
+                        <View style={{ width: "10%", justifyContent: "center", alignItems: "center" }}>
+                            <Icon name="user" size={22} color="#4E5050" />
+                        </View>
+                        <View>
+                            <Text style={{ fontSize: 15 }}>{student ? student.fullname : 'Cargando...'}</Text>
+                        </View>
+                    </View>
+                    <View style={{ flexDirection: "row" }}>
+                        <View style={{ width: "10%", justifyContent: "center", alignItems: "center" }}>
+                            <Icon name="graduation-cap" size={22} color="#4E5050" />
+                        </View>
+                        <View>
+                            <Text style={{ fontSize: 15 }}>{student ? student.carreraProfesional : 'Cargando...'}</Text>
+                        </View>
+                    </View>
+                    <View style={{ flexDirection: "row" }}>
+                        <View style={{ width: "10%", justifyContent: "center", alignItems: "center" }}>
+                            <Icon name="map-marker" size={22} color="#4E5050" />
+                        </View>
+                        <View>
+                            <Text style={{ fontSize: 15 }}>{student ? student.distrito : 'Cargando...'}</Text>
+                        </View>
+                    </View>
+                    <View style={{ flexDirection: "row" }}>
+                        <View style={{ width: "10%", justifyContent: "center", alignItems: "center" }}>
+                            <Icon name="birthday-cake" size={22} color="#4E5050" />
+                        </View>
+                        <View>
+                            <Text style={{ fontSize: 15 }}>{student ? new Date(student.fecha_nacimiento).toLocaleDateString() : 'Cargando...'}</Text>
+                        </View>
+                    </View>
+                    <View style={{ flexDirection: "row" }}>
+                        <View style={{ width: "10%", justifyContent: "center", alignItems: "center" }}>
+                            <Icon name="mars" size={22} color="#4E5050" />
+                        </View>
+                        <View>
+                            <Text>{student ? student.genre : 'Cargando...'}</Text>
+                        </View>
+                    </View>
+                    <View style={{ flexDirection: "row" }}>
+                        <View style={{ width: "10%", justifyContent: "center", alignItems: "center" }}>
+                            <Icon name="envelope" size={22} color="#4E5050" />
+                        </View>
+                        <View>
+                            <Text>{student ? student.userDto.email : 'Cargando...'}</Text>
+                        </View>
                     </View>
                 </View>
-                <View style={{ flexDirection: "row", gap: 5 }}>
+                <View style={styles.contenedorInfo}>
                     <View>
-                        <Text>{student ? new Date(student.fecha_nacimiento).toLocaleDateString() : 'No hay usuario'}</Text>
+                        <Text style={{ fontSize: 21, fontWeight: "bold" }}>Intereses Académicos</Text>
                     </View>
-                    <View>
-                        <Icon name="birthday-cake" size={18} color="#4E5050" />
-                    </View>
-                </View>
-                <View style={{ flexDirection: "row", gap: 5 }}>
-                    <View>
-                        <Text>{student ? student.distrito : 'No hay usuario'}</Text>
-                    </View>
-                    <View>
-                        <Icon name="map-marker" size={18} color="#4E5050" />
-                    </View>
-                </View>
-                <View style={{ flexDirection: "row", gap: 5 }}>
-                    <View>
-                        <Text>{student ? student.carreraProfesional : 'No hay usuario'}</Text>
-                    </View>
-                    <View>
-                        <Icon name="graduation-cap" size={18} color="#4E5050" />
+                    <View style={{ flexDirection: "row", flexWrap: 'wrap', justifyContent: 'flex-start', gap: 10 }}>
+                        {
+                            student ? (
+                                student.intereses.map((interest, index) => (
+                                    <View style={{ flexDirection: "row", backgroundColor: "#E9F0E5", padding: 10, borderRadius: 10, gap: 5 }} key={index}>
+                                        <View>
+                                            <Text style={{ fontSize: 15 }}>{interest}</Text>
+                                        </View>
+                                    </View>
+                                ))
+                            ) : (
+                                <></>
+                            )
+                        }
                     </View>
                 </View>
-                <View style={{ flexDirection: "row", gap: 5 }}>
+                <View style={styles.contenedorInfo}>
                     <View>
-                        <Text>{student ? student.genre : 'No hay usuario'}</Text>
+                        <Text style={{ fontSize: 21, fontWeight: "bold" }}>Hobbies</Text>
                     </View>
-                    <View>
-                        <Icon name="mars" size={18} color="blue" />
+                    <View style={{ flexDirection: "row", flexWrap: 'wrap', justifyContent: 'flex-start', gap: 10 }}>
+                        {
+                            student ? (
+                                student.hobbies != null ? (
+                                    student.hobbies.map((hobbie, index) => (
+                                        <View style={{ flexDirection: "row", backgroundColor: "#E9F0E5", padding: 10, borderRadius: 10, gap: 5 }} key={index}>
+                                            <View>
+                                                <Text style={{ fontSize: 15 }}>{hobbie}</Text>
+                                            </View>
+                                        </View>
+                                    ))
+                                ) : (
+                                    <Text>No hay hobbies</Text>
+                                )
+                            ) : (
+                                <></>
+                            )
+                        }
                     </View>
                 </View>
-                <View style={{ flexDirection: "row", gap: 4, marginTop: 10 }}>
-                    <TouchableOpacity style={styles.boton} >
-                        <Text style={{ color: '#ffffff', textAlign: 'center', fontWeight: "bold" }}>Añadir historia</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.boton2} onPress={handlePress1} >
-                        <Text style={{ color: 'black', textAlign: 'center', fontWeight: "bold" }}>Editar Perfil</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-            <View>
-                {listPost.map((post, index) => (
-                    <Post key={post.idPost || index} photo={post.photo} message={post.message} idStudent={post.idStudent} />
-                ))}
-            </View>
+                {/* <View>
+                    {listPost.map((post, index) => (
+                        <Post key={post.idPost || index} photo={post.photo} message={post.message} idStudent={post.idStudent} />
+                    ))}
+                </View> */}
             </ScrollView>
         </View>
     );
@@ -171,26 +391,24 @@ export default function UserProfile() {
 const styles = StyleSheet.create({
     contenedor: {
         flex: 1,
+        backgroundColor: "white",
     },
 
     contenedorFotos: {
-        paddingBottom: 50
+        justifyContent: "center",
+        alignItems: "center",
+        gap: 10
     },
 
     contenedorInfo: {
         paddingLeft: 10,
         paddingRight: 10,
-        paddingBottom: 20
+        paddingBottom: 20,
+        gap: 10
     },
 
     contenedorImagen: {
-        position: "absolute",
-        left: 10,
-        top: 87,
-        width: 160, // Ancho del contenedor
-        height: 160, // Alto del contenedor
-        borderRadius: 80, // Mitad del ancho/alto para hacerlo circular
-        overflow: "hidden"
+        overflow: "hidden",
     },
 
     contenedorEdicion: {
@@ -202,26 +420,19 @@ const styles = StyleSheet.create({
         height: 40,
         justifyContent: "center",
         alignItems: 'center',
-        top: 200,
-        left: 122,
         borderColor: "black",
         borderWidth: 1
     },
 
     imagen: {
-        width: 160, // Ancho del contenedor
-        height: 160, // Alto del contenedor
-    },
-
-    boton: {
-        backgroundColor: "#FF9F43",
-        padding: 10,
-        borderRadius: 15,
+        width: 120, // Ancho del contenedor
+        height: 120, // Alto del contenedor
+        borderRadius: 80
     },
 
     boton2: {
-        backgroundColor: "#D3DCDA",
-        padding: 10,
+        backgroundColor: "#FF9F43",
+        padding: 8,
         borderRadius: 15,
     },
 
@@ -246,4 +457,32 @@ const styles = StyleSheet.create({
         width: "100%", // Ancho del contenedor
         height: 400, // Alto del contenedor
     },
+
+    botonSolicitudNo: {
+        backgroundColor: "#FF9F43",
+        paddingTop: 12,
+        paddingBottom: 12,
+        paddingRight: 20,
+        paddingLeft: 20,
+        borderRadius: 6,
+        width: "100%"
+    },
+
+    botonSolicitudSi: {
+        backgroundColor: "#E7F0EE",
+        paddingTop: 12,
+        paddingBottom: 12,
+        paddingRight: 20,
+        paddingLeft: 20,
+        borderRadius: 6,
+        width: "100%"
+    },
+
+    textSolicitudNo: {
+        color: "white", textAlign: "center"
+    },
+
+    textSolicitudSi: {
+        color: "black", textAlign: "center"
+    }
 });

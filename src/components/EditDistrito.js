@@ -1,10 +1,14 @@
-import { View, TextInput, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
-import React, { useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, Text, StyleSheet, TouchableOpacity} from "react-native";
 import Autocomplete from 'react-native-autocomplete-input';
+import { useState } from "react";
+import { useRoute } from '@react-navigation/native';
+import { useAuth } from "./AuthContext";
+import axios from "axios";
 
-export default function SignUpLocation() {
+export default function EditDistrito() {
+    const route = useRoute();
+    const { usuario } = route.params;
+
     const DISTRICTS = [
         'Ancón', 'Ate', 'Barranco', 'Breña', 'Carabayllo', 'Chaclacayo', 'Chorrillos', 'Cieneguilla',
         'Comas', 'El Agustino', 'Independencia', 'Jesús María', 'La Molina', 'La Victoria', 'Lima',
@@ -37,28 +41,55 @@ export default function SignUpLocation() {
         setShowDropdown(false);
     };
 
-    const navigation = useNavigation();
-
-    const redirectToLogin = () => {
-        navigation.navigate('Login')
-    }
-
-    const redirectToSignUpEmail = async () => {
+    const { eliminarDatosUsuario } = useAuth();
+    const { guardarDatosUsuario } = useAuth();
+    const guardarCambios = async () => {
+        const formData = new FormData();
         try {
-            await AsyncStorage.setItem('location', query);
-            navigation.navigate('SignUpEmail')
-        } catch (e) {
-            console.error('Error guardando los datos', e);
+            const fecha = new Date(usuario.fecha_nacimiento);
+            const anio = fecha.getFullYear();
+            const mes = fecha.getMonth() + 1; // Sumamos 1 para obtener el mes real
+            const dia = fecha.getDate();
+            const fechaFormateada = `${anio}-${mes.toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}`;
+            formData.append("idStudent", usuario.idStudent);
+            formData.append("idUser", usuario.userDto.idUser);
+            formData.append("fullname", usuario.fullname);
+            formData.append("fecha_nacimiento", fechaFormateada);
+            formData.append("genero", usuario.genre);
+            formData.append('distrito', query);
+            formData.append("carreraProfesional", usuario.carreraProfesional);
+            formData.append('photo', {
+                uri: `data:image/jpeg;base64,${usuario.photo}`,
+                name: 'photo.jpg',
+                type: 'image/jpeg',
+            });
+            formData.append('biografia', usuario.biografia ? usuario.biografia : " ");
+            formData.append('intereses', JSON.stringify(usuario.intereses));
+            formData.append('hobbies', JSON.stringify(usuario.hobbies));
+            formData.append('nickname', usuario.nickname);
+            const response = await axios.put('http://192.168.1.39:9000/api/students', formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                }
+            );
+            if (response.data) {
+                eliminarDatosUsuario();
+                guardarDatosUsuario(response.data);
+            }
+        } catch (error) {
+            console.error('Error al enviar datos:', error);
+            if (error.response && error.response.status === 401) {
+                // Manejar el error 401 aquí
+                return "¡Error no se pudo actualizar!";
+            }
         }
     }
 
     return (
         <View style={styles.contenedor}>
-            <View style={styles.contenedorQuestion}>
-                <Text style={styles.textQuestionName}>¿En que distrito vives?</Text>
-                <Text>Digita el distrito real de tu residencia</Text>
-            </View>
-            <View style={{zIndex: 1, height: 50}}>
+            <View style={{ zIndex: 1, height: 50 }}>
                 <View style={styles.autocompleteContainer}>
                     <Autocomplete
                         data={filteredDistricts}
@@ -82,10 +113,7 @@ export default function SignUpLocation() {
                 </View>
             </View>
             <View>
-                <TouchableOpacity style={[!query ? styles.botonDisabled : styles.botonEnabled]} onPress={redirectToSignUpEmail} disabled={!query}><Text style={styles.textBoton}>Siguiente</Text></TouchableOpacity>
-            </View>
-            <View style={{ position: "absolute", bottom: 20, right: 15, width: "100%" }}>
-                <TouchableOpacity onPress={redirectToLogin}><Text style={styles.textCuenta}>¿Ya tienes una cuenta?</Text></TouchableOpacity>
+                <TouchableOpacity style={[!query ? styles.botonDisabled : styles.botonEnabled]} onPress={guardarCambios} disabled={!query}><Text style={styles.textBoton}>Guardar</Text></TouchableOpacity>
             </View>
         </View>
     );
@@ -147,7 +175,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
 
-    //Estilos de autocomplete
+    //Estilos para el autocomplete
     autocompleteContainer: {
         flex: 1,
         left: 0,
@@ -174,4 +202,5 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderColor: '#ccc',
     },
-});
+
+})

@@ -16,41 +16,45 @@ export default function SignUpPassword() {
     const { guardarDatosUsuario } = useAuth();
 
     const handleButtonPress = async () => {
-        const formData = new FormData();
+        const storedName = await AsyncStorage.getItem('name');
+        const storedLastName = await AsyncStorage.getItem('lastName');
+        const storedDate = await AsyncStorage.getItem('date');
+        const storedGenre = await AsyncStorage.getItem('genre');
+        const storedDistrict = await AsyncStorage.getItem('location')
+        const storedCarreer = await AsyncStorage.getItem('carreer');
+        const storedNickname = await AsyncStorage.getItem('nickname');
+
+        const storedEmail = await AsyncStorage.getItem('email');
+        const storedPassword = input;
+        const storedRole = "Usuario";
+
+        const student = {
+            fullname: storedName + " " + storedLastName,
+            fecha_nacimiento: storedDate,
+            genre: storedGenre,
+            distrito: storedDistrict,
+            carreraProfesional: storedCarreer,
+            photo: null,
+            biografia: "",
+            nickname: storedNickname,
+        };
+
+        const user = {
+            email: storedEmail,
+            password: storedPassword,
+            rol: storedRole
+        };
+
+        const SignUpDTO = {
+            student: student,
+            user: user,
+        };
+
         try {
-            const storedName = await AsyncStorage.getItem('name');
-            const storedLastName = await AsyncStorage.getItem('lastName');
-            const storedDate = await AsyncStorage.getItem('date');
-            const storedGenre = await AsyncStorage.getItem('genre');
-            const storedDistrict = await AsyncStorage.getItem('location')
-            const storedCarreer = await AsyncStorage.getItem('carreer');
-
-            const storedEmail = await AsyncStorage.getItem('email');
-            const storedPassword = input;
-            const storedRole = "Usuario"
-
-            formData.append("fullname", storedName + " " + storedLastName);
-            formData.append("fecha_nacimiento", storedDate);
-            formData.append("genero", storedGenre);
-            formData.append("distrito", storedDistrict);
-            formData.append("carreraProfesional", storedCarreer);
-            formData.append("photo", null);
-            formData.append("email", storedEmail);
-            formData.append("password", storedPassword);
-            formData.append("rol", storedRole);
-
-            const response = await axios.post('http://192.168.1.39:9000/api/students', formData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                }
-            );
-
+            const response = await axios.post('http://192.168.1.39:9000/api/users/signUp', SignUpDTO);
             if (response.data) {
                 guardarDatosUsuario(response.data);
-                console.log(response.data);
-                navigation.navigate('Inicio');
+                //navigation.navigate('Inicio');
             }
         } catch (e) {
             console.error('Error retrieving data', e);

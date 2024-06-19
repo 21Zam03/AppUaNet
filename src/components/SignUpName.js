@@ -1,5 +1,5 @@
 import { View, TextInput, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -24,6 +24,15 @@ export default function SignUpName() {
         }
     }
 
+    const lastNameInputRef = useRef(null);
+    const handleNameSubmitEditing = () => {
+        if (name === "") {
+            console.log("Nombre vacio");
+        } else {
+            lastNameInputRef.current.focus();
+        }
+    };
+
     return (
         <View style={styles.contenedor}>
             <View style={styles.contenedorQuestion}>
@@ -31,8 +40,21 @@ export default function SignUpName() {
                 <Text>Digita el nombre que usas en tu vida real</Text>
             </View>
             <View style={styles.contenedorInputs}>
-                <TextInput style={styles.inputs} value={name} onChangeText={setName} placeholder="Nombres"></TextInput>
-                <TextInput style={styles.inputs} value={lastName} onChangeText={setLastName} placeholder="Apellidos"></TextInput>
+                <TextInput 
+                    style={styles.inputs} 
+                    value={name} 
+                    onChangeText={setName} 
+                    placeholder="Nombres" 
+                    autoFocus={true}
+                    onSubmitEditing={handleNameSubmitEditing}
+                ></TextInput>
+                <TextInput 
+                    style={styles.inputs} 
+                    value={lastName} 
+                    onChangeText={setLastName} 
+                    placeholder="Apellidos"
+                    ref={lastNameInputRef}
+                ></TextInput>
             </View>
             <View>
                 <TouchableOpacity style={[!name || !lastName ? styles.botonDisabled : styles.botonEnabled]} onPress={redirectToSignUpBirthday} disabled={!name || !lastName}><Text style={styles.textBoton}>Siguiente</Text></TouchableOpacity>

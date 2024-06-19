@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity, Animated, Modal } from "react-native";
 import PostUser from "./PostUser";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import IconIon from 'react-native-vector-icons/Ionicons';
 import { useState, useRef, useEffect } from "react";
 import axios from 'axios';
 import ModalComment from "./ModalComment";
@@ -8,32 +9,23 @@ import { TextInput } from "react-native-gesture-handler";
 import { useAuth } from "./AuthContext";
 import { Buffer } from 'buffer';
 
-export default function Post({ idPost, message, photo, datePublished, idStudent, likes, type }) {
+export default function Post({ idPost, message, photo, datePublished, idStudent, likes, type, studentStorage }) {
 
-    const [listComments, setListComments] = useState([]);
-    const [isCommentVisible, setCommentVisible] = useState(false);
-    const openComment = async () => {
-        try {
-            const response = await axios.get(`http://192.168.1.39:9000/api/comments/post/${idPost}`);
-            if (response.data) {
-                setListComments(response.data);
-            }
-        } catch (error) {
-            console.error('Error al obtener los datos:', error);
-        }
-        setCommentVisible(true);
-    }
+    //Logica para la animacion del like y manejo del estado liked
+    const userHasLiked = (idStudent, likes) => {
+        return likes.includes(idStudent);
+    };
 
-    const closeComment = () => setCommentVisible(false);
-    const [liked, setLiked] = useState(false);
+    const [liked, setLiked] = useState(userHasLiked(studentStorage.idStudent, likes));
     const scaleAnim = useRef(new Animated.Value(1)).current;
-
-    const [likeCount, setLikeCount] = useState(likes);
-
-    const handlePress = () => {
+    const [likeCount, setLikeCount] = useState(likes.length);
+    const [listLikes, setListLikes] = useState(likes);
+    const handlePress = (idStudent) => {
         if (liked) {
             setLikeCount(likeCount => likeCount - 1);
+            setListLikes(listLikes.filter(l => l !== idStudent));
         } else {
+            setListLikes([...listLikes, idStudent]);
             setLikeCount(likeCount => likeCount + 1);
         }
         setLiked(!liked);
@@ -52,14 +44,47 @@ export default function Post({ idPost, message, photo, datePublished, idStudent,
         ]).start();
     };
 
+    //Logica para manejar los comentarios
+    const [listComments, setListComments] = useState([]);
+    const [isCommentVisible, setCommentVisible] = useState(false);
+    const openComment = async () => {
+        try {
+            const response = await axios.get(`http://192.168.1.39:9000/api/comments/post/${idPost}`);
+            if (response.data) {
+                setListComments(response.data);
+            }
+        } catch (error) {
+            console.error('Error al obtener los comentarios:', error);
+        }
+        setCommentVisible(true);
+    }
+    const closeComment = () => setCommentVisible(false);
+
+    const [isInitialized, setIsInitialized] = useState(false);
+
+    //
     const updatePost = async () => {
+        console.log("Se ejecuto el metodo");
+        const formatDate = (inputDate) => {
+            const date = new Date(inputDate);
+            const year = date.getFullYear();
+            const month = ('0' + (date.getMonth() + 1)).slice(-2); // Añade ceros a la izquierda si es necesario
+            const day = ('0' + date.getDate()).slice(-2);
+            const hours = ('0' + date.getHours()).slice(-2);
+            const minutes = ('0' + date.getMinutes()).slice(-2);
+            const seconds = ('0' + date.getSeconds()).slice(-2);
+
+            // Formato deseado: yyyy-MM-dd HH:mm:ss
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        };
+        const formattedDate = formatDate(datePublished);
         const formData = new FormData();
         try {
             formData.append("idPost", idPost);
             formData.append("idStudent", idStudent);
             formData.append("message", message);
-            formData.append("datePublished", datePublished);
-            formData.append("likes", likeCount);
+            formData.append("datePublished", formattedDate);
+            formData.append("likes", JSON.stringify(listLikes));
             formData.append("type", type);
             if (photo != null) {
                 formData.append('photo', {
@@ -77,8 +102,8 @@ export default function Post({ idPost, message, photo, datePublished, idStudent,
                 },
             });
             if (response.data) {
-                console.log("Publicacion actualizada: ");
-                console.log(response.data.likes);
+                //console.log("Publicacion actualizada: ");
+                //console.log(response.data.likes);
             }
         } catch (error) {
             console.error('Error al tratar de actualizar la publicacion:', error);
@@ -87,15 +112,17 @@ export default function Post({ idPost, message, photo, datePublished, idStudent,
 
     useEffect(() => {
         // Ejecutar updatePost solo cuando likeCount y liked hayan sido actualizados
-        updatePost();
-    }, [likeCount, liked]);
+        if (isInitialized) {
+            updatePost();
+        } else {
+            setIsInitialized(true);
+        }
+    }, [likeCount]);
 
     const [student, setStudent] = useState();
     useEffect(() => {
-        // Realizar la petición Axios para obtener la lista de publicaciones
         axios.get(`http://192.168.1.39:9000/api/students/${idStudent}`)
             .then(response => {
-                // Actualizar el estado con la lista de publicaciones recibidas
                 setStudent(response.data)
             })
             .catch(error => {
@@ -136,6 +163,8 @@ export default function Post({ idPost, message, photo, datePublished, idStudent,
             });
 
             if (response.data) {
+                console.log("Respuesta: "+JSON.stringify(response.data));
+                setListComments(prevComments => [...prevComments, response.data]);
                 setCommentUser("");
             }
         } catch (error) {
@@ -145,7 +174,7 @@ export default function Post({ idPost, message, photo, datePublished, idStudent,
 
     return (
         <View style={styles.container}>
-            <PostUser idStudent={idStudent} idPost={idPost} />
+            <PostUser student={student} idPost={idPost} datePublished={datePublished} studentStorage={studentStorage}/>
             <View style={styles.textContainer}>
                 <Text>{message}</Text>
             </View>
@@ -159,94 +188,107 @@ export default function Post({ idPost, message, photo, datePublished, idStudent,
                     />
                 </View>
             )}
-            <View style={{ flexDirection: "row", alignItems: "start", justifyContent: "space-between", padding: 10 }}>
-                <View style={{ flexDirection: "row", gap: 20, alignItems: "start" }}>
-                    <View>
-                        <TouchableOpacity onPress={handlePress}>
-                            <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-                                <Icon
-                                    name={liked ? "heart" : "heart-outline"}
-                                    size={25}
-                                    color={liked ? "red" : "black"}
-                                />
-                            </Animated.View>
-                        </TouchableOpacity>
-                        <Text style={{ textAlign: "center" }}>{likeCount} likes</Text>
-                    </View>
-                    <View>
-                        <TouchableOpacity onPress={openComment}>
-                            <Icon name="comment-outline" size={25} color="#000" style={styles.icon} />
-                        </TouchableOpacity>
-                    </View>
-                    <Modal
-                        transparent={true}
-                        visible={isCommentVisible}
-                        onRequestClose={closeComment}
-                        animationType="slide"
-                    >
-                        <View style={styles.overlay}>
-                            <View style={styles.menuContainer}>
-                                <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10, borderColor: "#DBDAD8", borderBottomWidth: 1, paddingBottom: 10 }}>
-                                    <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 5 }}>
-                                        <Icon name={"heart"} size={25} color={"red"}></Icon>
-                                        <Text>{likes} likes</Text>
+            <View style={{padding: 10, gap: 8}}>
+                <View style={{ flexDirection: "row", alignItems: "start", justifyContent: "space-between" }}>
+                    <View style={{ flexDirection: "row", gap: 20, alignItems: "start", justifyContent: "center" }}>
+                        <View style={{ justifyContent: "start", alignItems: "center" }}>
+                            <TouchableOpacity onPress={() => handlePress(studentStorage.idStudent)}>
+                                <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+                                    <IconIon
+                                        name={liked ? "heart" : "heart-outline"}
+                                        size={25}
+                                        color={liked ? "red" : "black"}
+                                    />
+                                </Animated.View>
+                            </TouchableOpacity>
+                        </View>
+                        <View>
+                            <TouchableOpacity onPress={openComment}>
+                                <IconIon name="chatbubble-outline" size={22} color="#000" style={styles.icon} />
+                            </TouchableOpacity>
+                        </View>
+                        <Modal
+                            transparent={true}
+                            visible={isCommentVisible}
+                            onRequestClose={closeComment}
+                            animationType="slide"
+                        >
+                            <View style={styles.overlay}>
+                                <View style={styles.menuContainer}>
+                                    <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10, borderColor: "#DBDAD8", borderBottomWidth: 1, paddingBottom: 10 }}>
+                                        <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 5 }}>
+                                            <IconIon name={"heart-outline"} size={22} color={"black"}></IconIon>
+                                            <Text>{likes.length} likes</Text>
+                                        </View>
+                                        <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 5 }}>
+                                            <IconIon name="chatbubble-outline" size={20} color="#000" style={styles.icon} />
+                                            <Text>{listComments.length} comentarios</Text>
+                                        </View>
                                     </View>
-                                    <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 5 }}>
-                                        <Icon name="comment" size={20} color="#FF9F43" style={styles.icon} />
-                                        <Text>{listComments.length} comentarios</Text>
-                                    </View>
-                                </View>
-                                {listComments.length <= 0 ? (
-                                    <View>
-                                        <Text style={{ textAlign: "center" }}>No hay comentarios</Text>
-                                    </View>
-                                ) : (
-                                    <View>
-                                        {listComments.map(comment => (
-                                            <ModalComment key={comment.idComment} idStudent={comment.idStudent} idPost={comment.idPost} comment={comment.comment} like={comment.like} />
-                                        ))}
-                                    </View>
-                                )}
-                                <View style={{ position: "absolute", bottom: 0, width: "100%", flexDirection: "row", padding: 10, justifyContent: "space-around", borderTopWidth: 1, borderTopColor: "#DBDAD8", alignItems: "start" }}>
-                                    {usuario && usuario.photo ? (
-                                        <View style={styles.comentarioContainerImagen}>
-                                            <Image
-                                                source={usuario ? { uri: `data:image/png;base64,${usuario.photo}` } : "No hay foto"}
-                                                style={styles.comentarioImagen}
-                                            />
+                                    {listComments.length <= 0 ? (
+                                        <View>
+                                            <Text style={{ textAlign: "center" }}>No hay comentarios</Text>
                                         </View>
                                     ) : (
-                                        <View style={styles.comentarioContainerImagen}>
-                                            <Image
-                                                source={require('../../assets/photo-perfil.png')}
-                                                style={styles.comentarioImagen}
-                                            />
+                                        <View>
+                                            {listComments.map(comment => (
+                                                <ModalComment key={comment.idComment} idStudent={comment.idStudent} idPost={comment.idPost} comment={comment.comment} like={comment.like} />
+                                            ))}
                                         </View>
                                     )}
-                                    <TextInput style={{ padding: 4, flex: 0.8 }} placeholder="Comenta para..... " value={commentUser} onChangeText={setCommentUser}></TextInput>
-                                    <TouchableOpacity onPress={handleComment} style={{ justifyContent: "center", padding: 10 }}><Icon name="send" size={25} color="#FF9F43" /></TouchableOpacity>
+                                    <View style={{backgroundColor: "white",  position: "absolute", bottom: 0, width: "100%", flexDirection: "row", padding: 10, justifyContent: "space-around", borderTopWidth: 1, borderTopColor: "#DBDAD8", alignItems: "start"}}>
+                                        {usuario && usuario.photo ? (
+                                            <View style={styles.comentarioContainerImagen}>
+                                                <Image
+                                                    source={usuario ? { uri: `data:image/png;base64,${usuario.photo}` } : "No hay foto"}
+                                                    style={styles.comentarioImagen}
+                                                />
+                                            </View>
+                                        ) : (
+                                            <View style={styles.comentarioContainerImagen}>
+                                                <Image
+                                                    source={require('../../assets/photo-perfil.png')}
+                                                    style={styles.comentarioImagen}
+                                                />
+                                            </View>
+                                        )}
+                                        <TextInput 
+                                            style={{ padding: 4, flex: 0.8 }} 
+                                            placeholder="Comenta para..... " 
+                                            value={commentUser} 
+                                            onChangeText={setCommentUser} 
+                                            autoFocus={true}
+                                            onSubmitEditing={handleComment}
+                                        ></TextInput>
+                                        <TouchableOpacity onPress={handleComment} style={{ justifyContent: "center", padding: 10 }}><Icon name="send" size={25} color="#FF9F43" /></TouchableOpacity>
+                                    </View>
                                 </View>
                             </View>
-                        </View>
-                    </Modal>
-                </View>
-                <View>
-                    <TouchableOpacity>
-                        <Icon name="bookmark-outline" size={25} color="black" />
+                        </Modal>
+                    </View>
+                    <View>
+                        <TouchableOpacity>
+                            <IconIon name="bookmark-outline" size={23} color="black" />
+                        </TouchableOpacity>
+                    </View>
+                </View >
+                <View style={{flexDirection: "row", justifyContent: "space-between"}}>
+                    <TouchableOpacity><Text style={{ fontSize: 13 }}>{likeCount} likes</Text></TouchableOpacity>
+                    <TouchableOpacity onPress={openComment}>
+                        <Text style={{ fontSize: 13, color: "gray" }}>{listComments.length} comentarios</Text>
                     </TouchableOpacity>
                 </View>
-            </View >
+            </View>
         </View >
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: 5,
-        borderTopWidth: 1,
-        borderBottomWidth: 1,
+        marginTop: 4,
         paddingTop: 10,
         borderColor: "#E7E1E0",
+        backgroundColor: "white"
     },
 
     textContainer: {

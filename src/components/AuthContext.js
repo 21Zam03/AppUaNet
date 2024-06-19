@@ -21,18 +21,14 @@ export const AuthProvider = ({ children }) => {
                 withCredentials: true,
             });
 
-            if (response.data.success) {
-                guardarDatosUsuario(response.data.studentDTO);
-                const token = response.headers.get('authorization');
-                guardarToken(token);
-                //console.log(token);
+            if (response.data.idStudent) {
+                guardarDatosUsuario(response.data);
+                return false;
+            } else {
+                return true;
             }
         } catch (error) {
             console.error('Error al enviar datos:', error);
-            if (error.response && error.response.status === 401) {
-                // Manejar el error 401 aquí
-                return "¡El correo u contraseña son incorrectas!";
-            }
         }
     };
 

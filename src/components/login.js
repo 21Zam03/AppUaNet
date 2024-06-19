@@ -1,34 +1,92 @@
 import { View, TextInput, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from "./AuthContext";
+import { Animated } from "react-native";
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 export default function Login() {
+
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState('');
+    const [emailTest, setEmailTest] = useState(false);
     const [password, setPassword] = useState('');
-    const [message, setMessage] = useState('');
+    const [passwordTest, setPasswordTest] = useState(false);
+    const [messageTest, setMessageTest] = useState(false);
 
     const { handleLogin } = useAuth();
 
     const handleButtonPress = async () => {
-        setLoading(true);
-        try {
-            const resultMessage = await handleLogin(email, password);
-            setMessage(resultMessage);
-        } catch (error) {
-            console.error('Error al manejar el inicio de sesión:', error);
-        } finally {
-            setTimeout(() => {
-                setLoading(false); // Cuando la tarea finalice, ocultar el efecto de carga
-            }, 4000);
+        if (password === "") {
+            setPasswordTest(true);
+        } else {
+            setPasswordTest(false);
+            setLoading(true);
+            try {
+                const resultMessage = await handleLogin(email, password);
+                setMessageTest(resultMessage);
+            } catch (error) {
+                console.error('Error al manejar el inicio de sesión:', error);
+            } finally {
+                setTimeout(() => {
+                    setLoading(false); // Cuando la tarea finalice, ocultar el efecto de carga
+                }, 4000);
+            }
+        }
+
+    };
+
+    const emailRef = useRef(null);
+    useEffect(() => {
+        if (emailRef.current) {
+            emailRef.current.focus();
+        }
+    }, []);
+
+    const passwordInputRef = useRef(null);
+    const handleEmailSubmitEditing = () => {
+        if (email === "") {
+            setEmailTest(true);
+        } else {
+            setEmailTest(false);
+            passwordInputRef.current.focus();
         }
     };
+
+    //Animacion de cargado
+    const [isVisible, setIsVisible] = useState(true);
+    const fadeAnim = new Animated.Value(1);
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            // Toggle visibility
+            setIsVisible((prev) => !prev);
+        }, 500); // Intervalo de parpadeo en milisegundos (500ms)
+
+        return () => clearInterval(intervalId);
+    }, []);
+
+    useEffect(() => {
+        // Configurar la animación de desvanecimiento
+        if (loading) {
+            Animated.loop(
+                Animated.timing(fadeAnim, {
+                    toValue: isVisible ? 0 : 1,
+                    duration: 500,
+                    useNativeDriver: true,
+                }),
+            ).start();
+        } else {
+            // Detener la animación cuando loading sea falso
+            fadeAnim.setValue(1); // Reiniciar opacidad a 1
+        }
+    }, [loading, isVisible]);
 
     return (
         <View style={login_styles.contenedor}>
             {loading ? (
-                <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0, 0, 0, 0.1)', justifyContent: 'center', alignItems: 'center'}]}>
-                    <ActivityIndicator size="large" color="#ffffff"/>
+                <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0, 0, 0, 0.1)', justifyContent: 'center', alignItems: 'center', gap: 5 }]}>
+                    <ActivityIndicator size="large" color="#FF9F43" />
+                    <Animated.Text style={[{ fontStyle: 'italic', opacity: fadeAnim }]}>Cargando...</Animated.Text>
                 </View>
             ) : (
                 <View style={{ flex: 1 }}>
@@ -42,44 +100,82 @@ export default function Login() {
                     </View>
                     <View style={{ paddingRight: 15, paddingLeft: 15, paddingTop: 15, paddingBottom: 15, flex: 1 }}>
                         <View style={login_styles.login_contenedor}>
-                            <View style={{ marginBottom: 30 }}><Text style={{ color: "#FF9F43", fontWeight: "bold", textAlign: "center", fontSize: 26 }}>INICIAR SESIÓN</Text></View>
-                            <View style={login_styles.username_contenedor}>
-                                <Text style={login_styles.label}>Correo:</Text>
-                                <TextInput
-                                    style={login_styles.input}
-                                    value={email}
-                                    onChangeText={setEmail}
-                                    placeholder="Digita tu correo"
-                                    autoCapitalize="none"
-                                />
+                            <View>
+                                <Text style={{ color: "#FF9F43", fontWeight: "bold", textAlign: "center", fontSize: 26 }}>INICIAR SESIÓN</Text>
                             </View>
-                            <View style={login_styles.password_contenedor}>
-                                <Text style={login_styles.label}>Contraseña:</Text>
-                                <TextInput
-                                    style={login_styles.input}
-                                    value={password}
-                                    onChangeText={setPassword}
-                                    placeholder="Digita tu contraseña"
-                                    secureTextEntry={true}
-                                    autoCapitalize="none"
-                                />
+                            <View style={{ gap: 20 }}>
+                                <View style={login_styles.username_contenedor}>
+                                    <Text style={login_styles.label}>Correo:</Text>
+                                    <TextInput
+                                        style={login_styles.input}
+                                        placeholder="ejemplo@autonoma.edu.pe"
+                                        value={email}
+                                        onChangeText={setEmail}
+                                        autoCapitalize="none"
+                                        keyboardType="email-address"
+                                        ref={emailRef}
+                                        onSubmitEditing={handleEmailSubmitEditing}
+                                        returnKeyType="next"
+                                        autoFocus={true}
+                                    />
+                                    {
+                                        emailTest ? (
+                                            <View style={{ flexDirection: "row", alignItems: "center", gap: 10}}>
+                                                <Icon name="exclamation-triangle" size={15} color="orange" />
+                                                <Text style={{ color: "orange" }}>Digite su correo porfavor</Text>
+                                            </View>
+                                        ) : (
+                                            <></>
+                                        )
+                                    }
+                                </View>
+                                <View style={login_styles.password_contenedor}>
+                                    <Text style={login_styles.label}>Contraseña:</Text>
+                                    <TextInput
+                                        style={login_styles.input}
+                                        value={password}
+                                        onChangeText={setPassword}
+                                        placeholder="ejemplo"
+                                        secureTextEntry={true}
+                                        autoCapitalize="none"
+                                        ref={passwordInputRef}
+                                        onSubmitEditing={handleButtonPress}
+                                    />
+                                    {
+                                        passwordTest ? (
+                                            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                                                <Icon name="exclamation-triangle" size={15} color="orange" />
+                                                <Text style={{ color: "orange" }}>Digite su contraseña porfavor</Text>
+                                            </View>
+                                        ) : (
+                                            <></>
+                                        )
+                                    }
+                                </View>
+                            </View>
+                            {
+                                messageTest ? (
+                                    <View style={{ gap: 10 }}>
+                                        <View>
+                                            <Text style={{ textAlign: "center", color: "red" }}>El correo u contraseña son incorrectas</Text>
+                                        </View>
+                                    </View>
+                                ) : (
+                                    <></>
+                                )
+                            }
+                            <View>
+                                <TouchableOpacity style={[!email || !password ? login_styles.botonDisabled : login_styles.botonEnabled]} onPress={() => handleButtonPress()} disabled={!email || !password}>
+                                    <Text style={{ color: '#ffffff', textAlign: 'center', fontWeight: "bold" }}>INGRESAR</Text>
+                                </TouchableOpacity>
                             </View>
                             <View>
-                                <View>
-                                    <Text style={{ textAlign: "center", color: "red" }}>{message}</Text>
-                                </View>
-                                <View>
-                                    <Text style={{ textAlign: 'center', marginBottom: 10 }}>¿Olvidastes la contraseña?</Text>
-                                </View>
-                            </View>
-                            <View style={{ marginTop: 20 }}>
-                                <TouchableOpacity style={login_styles.boton} onPress={() => handleButtonPress()}>
-                                    <Text style={{ color: '#ffffff', textAlign: 'center', fontWeight: "bold" }}>INGRESAR</Text>
+                                <TouchableOpacity>
+                                    <Text style={{ textAlign: 'center', color: "gray" }}>¿Olvidastes la contraseña?</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
                     </View>
-
                 </View>
             )}
         </View>
@@ -94,11 +190,13 @@ const login_styles = StyleSheet.create({
     },
 
     username_contenedor: {
-        gap: 0
+        gap: 5,
+        position: "relative",
     },
 
     password_contenedor: {
-        gap: 0
+        gap: 5,
+        position: "relative"
     },
 
     titulo_contenedor: {
@@ -119,19 +217,19 @@ const login_styles = StyleSheet.create({
         paddingBottom: 50,
         paddingLeft: 20,
         paddingRight: 20,
+        gap: 30
     },
 
     input: {
-        marginBottom: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: "#FF9F43",
-        paddingTop: 15,
-        paddingBottom: 15,
-        backgroundColor: '#ffffff'
+        borderWidth: 1,
+        borderColor: "#FF9F43",
+        padding: 15,
+        backgroundColor: '#ffffff',
+        borderRadius: 10
     },
 
     label: {
-        fontWeight: 'bold',
+        color: "orange",
     },
 
     contenedor_imagen: {
@@ -145,8 +243,14 @@ const login_styles = StyleSheet.create({
         marginBottom: 0,
     },
 
-    boton: {
+    botonEnabled: {
         backgroundColor: "#FF9F43",
+        padding: 20,
+        borderRadius: 30
+    },
+
+    botonDisabled: {
+        backgroundColor: "#FED77C",
         padding: 20,
         borderRadius: 30
     },

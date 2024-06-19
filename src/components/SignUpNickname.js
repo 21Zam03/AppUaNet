@@ -3,16 +3,16 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState } from "react";
 
-export default function SignUpEmail() {
+export default function SignUpNickname() {
 
-    const [email, setEmail] = useState("");
+    const [nickname, setNickname] = useState("");
 
     const navigation = useNavigation();
 
     const redirectToSignUpCode = async () => {
         try {
-            await AsyncStorage.setItem('email', email);
-            navigation.navigate('SignUpCode')
+            await AsyncStorage.setItem('nickname', nickname);
+            navigation.navigate('SignUpPassword')
             //Guardar el codigo de confirmacion en el asyncStorage
         } catch (e) {
             console.error('Error guardando los datos', e);
@@ -22,26 +22,22 @@ export default function SignUpEmail() {
     return (
         <View style={styles.contenedor}>
             <View style={styles.contenedorQuestion}>
-                <Text style={styles.textQuestionName}>¿Cual es tu correo?</Text>
-                <Text>Digita tu correo institucional para conectar a la plataforma</Text>
+                <Text style={styles.textQuestionName}>Crear nickname</Text>
+                <Text>Digita un nickname que te va identificar dentro de la plataforma social</Text>
             </View>
             <View style={styles.contenedorInputs}>
                 <TextInput
                     style={styles.inputs}
-                    value={email}
-                    onChangeText={setEmail}
-                    placeholder="Correo institucional"
+                    value={nickname}
+                    onChangeText={setNickname}
+                    placeholder="@Nickname"
                     autoCapitalize="none"
-                    keyboardType="email-address"
                     autoFocus={true}
                 >
                 </TextInput>
             </View>
             <View>
-                <Text>Podrias recibir notificaciones y mensajes a tu correo institucional por parte de nosotros</Text>
-            </View>
-            <View>
-                <TouchableOpacity style={[!email ? styles.botonDisabled : styles.botonEnabled]} onPress={redirectToSignUpCode} disabled={!email}><Text style={styles.textBoton}>Siguiente</Text></TouchableOpacity>
+                <TouchableOpacity style={[!nickname ? styles.botonDisabled : styles.botonEnabled]} onPress={redirectToSignUpCode} disabled={!nickname}><Text style={styles.textBoton}>Siguiente</Text></TouchableOpacity>
             </View>
         </View>
     );

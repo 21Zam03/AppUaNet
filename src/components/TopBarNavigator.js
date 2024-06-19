@@ -1,5 +1,7 @@
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon2 from 'react-native-vector-icons/AntDesign';
+import Icon3 from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import Home from './Home';
 import News from './News';
@@ -15,11 +17,11 @@ export default function TopBarNavigation() {
             initialRouteName="Home"
             screenOptions={{
                 tabBarActiveTintColor: '#FF9F43',
-                tabBarInactiveTintColor: 'gray',
+                tabBarInactiveTintColor: 'black',
                 tabBarLabelStyle: { fontSize: 12 },
                 tabBarStyle: { 
                     backgroundColor: 'white',
-                    borderBottomWidth: 1, // Espesor del borde inferior
+                    borderBottomWidth: 0, // Espesor del borde inferior
                     borderBottomColor: '#F5F5EC', // Color del borde inferior
                 },
                 tabBarIndicatorStyle: {
@@ -34,7 +36,7 @@ export default function TopBarNavigation() {
                 component={Home}
                 options={{
                     tabBarIcon: ({ color, size }) => (
-                        <Icon name="home" color={color} size={25} />
+                        <Icon2 name="home" color={color} size={25} />
                     ),
                 }}
             />
@@ -43,7 +45,7 @@ export default function TopBarNavigation() {
                 component={News}
                 options={{
                     tabBarIcon: ({ color, size }) => (
-                        <Icon name="newspaper-o" color={color} size={20} />
+                        <Icon2 name="profile" color={color} size={20} />
                     ),
                 }}
             />
@@ -52,7 +54,7 @@ export default function TopBarNavigation() {
                 component={FriendShip}
                 options={{
                     tabBarIcon: ({ color, size }) => (
-                        <Icon name="user-plus" color={color} size={22} />
+                        <Icon2 name="adduser" color={color} size={22} />
                     ),
                 }}
             />
@@ -61,7 +63,7 @@ export default function TopBarNavigation() {
                 component={Notification}
                 options={{
                     tabBarIcon: ({ color, size }) => (
-                        <Icon name="bell" color={color} size={22} />
+                        <Icon2 name="bells" color={color} size={22} />
                     ),
                 }}
             />
@@ -70,7 +72,7 @@ export default function TopBarNavigation() {
                 component={Account}
                 options={{
                     tabBarIcon: ({ color, size }) => (
-                        <Icon name="user" color={color} size={22} />
+                        <Icon3 name="menu" color={color} size={22} />
                     ),
                 }}
             />

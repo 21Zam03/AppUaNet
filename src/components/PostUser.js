@@ -4,45 +4,60 @@ import { useEffect, useState } from "react";
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-export default function PostUser({ idStudent, idPost }) {
+export default function PostUser({ student, idPost, datePublished, studentStorage }) {
+    const [timeDiff, setTimeDiff] = useState(null);
+    useEffect(() => {
+        const currentDate = new Date();
+        const targetDateTime = new Date(datePublished);
+        const differenceMs = currentDate.getTime() - targetDateTime.getTime();
+        // Calculating days, hours, minutes, seconds
+        const days = Math.floor(differenceMs / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((differenceMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((differenceMs % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((differenceMs % (1000 * 60)) / 1000);
+        if (days > 0) {
+            setTimeDiff(`${days}d`);
+        } else if (hours > 0) {
+            setTimeDiff(`${hours}h`)
+        } else if (minutes > 0) {
+            setTimeDiff(`${minutes}m`)
+        } else {
+            setTimeDiff(`${seconds}s`)
+        }
+        // Format the output
+        //const formattedDiff = `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
+        //setTimeDiff(formattedDiff);
+    }, []);
 
     const [isModalVisible, setModalVisible] = useState(false);
     const openModal = () => setModalVisible(true);
     const closeModal = () => setModalVisible(false);
 
+    const [modalDelete, setModalDelete] = useState(false);
+    const openModal2 = () => setModalDelete(true);
+    const closeModal2 = () => setModalDelete(false);
+
     const navigation = useNavigation();
     const handlePress1 = () => {
         navigation.navigate('Perfil', {
-            idStudent: idStudent,
+            idStudent: student.idStudent,
         })
     };
-
-    const [student, setStudent] = useState();
-    useEffect(() => {
-        // Realizar la petición Axios para obtener la lista de publicaciones
-        axios.get(`http://192.168.1.39:9000/api/students/${idStudent}`)
-            .then(response => {
-                // Actualizar el estado con la lista de publicaciones recibidas
-                setStudent(response.data)
-            })
-            .catch(error => {
-                console.error('Error al obtener al estudiante:', error);
-            });
-    }, []);
 
     const deletePost = async () => {
         try {
             const response = await axios.delete(`http://192.168.1.39:9000/api/posts/${idPost}`);
             if (response.data) {
                 closeModal();
-                console.log("Publicacion eliminada: ",idPost);
+                closeModal2();
+                console.log("Publicacion eliminada: ", idPost);
                 navigation.navigate('Inicio');
             }
         } catch (error) {
             console.error('Error al tratar de eliminar la publicacion:', error);
         }
     };
-    
+
     return (
         <View style={styles.contenedorPadre}>
             <TouchableOpacity onPress={handlePress1}>
@@ -63,22 +78,22 @@ export default function PostUser({ idStudent, idPost }) {
                 )}
             </TouchableOpacity>
             <View style={styles.contenedorInput} >
-                <Text style={styles.textInput}>{student ? student.fullname : 'valor predeterminado'}</Text>
-                <Text style={styles.textInput}>1h</Text>
+                <TouchableOpacity onPress={handlePress1}><Text style={styles.textInput}>{student ? student.fullname : 'valor predeterminado'}</Text></TouchableOpacity>
+                <Text style={{ color: "gray" }}>{timeDiff}</Text>
             </View>
             <View style={styles.contenedorOpciones} >
                 <TouchableOpacity onPress={openModal} style={{ padding: 8 }}>
-                    <Icon name="ellipsis-horizontal" size={20} color="black"/>
+                    <Icon name="ellipsis-horizontal" size={15} color="gray" />
                 </TouchableOpacity>
                 <Modal
                     transparent={true}
                     visible={isModalVisible}
                     onRequestClose={closeModal}
-                    animationType="slide"
+                    animationType="fade"
                 >
                     <View style={styles.overlay}>
                         <View style={styles.menuContainer}>
-                            <TouchableOpacity style={styles.menuItem} onPress={() => { onDelete(idStudent); closeModal(); }}>
+                            <TouchableOpacity style={styles.menuItem}>
                                 <View>
                                     <Icon
                                         name="bookmark"
@@ -100,15 +115,46 @@ export default function PostUser({ idStudent, idPost }) {
                                     <Text style={styles.menuItemText}>Copie el link y compartalo con amigos</Text>
                                 </View>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.menuItem} onPress={deletePost}>
-                                <View>
-                                    <Icon name="trash" size={26} color="black" />
+                            {
+                                student && studentStorage ? (
+                                    student.idStudent === studentStorage.idStudent ? (
+                                        <TouchableOpacity style={styles.menuItem} onPress={openModal2}>
+                                            <View>
+                                                <Icon name="trash" size={26} color="black" />
+                                            </View>
+                                            <View>
+                                                <Text style={[styles.menuItemText, { fontWeight: "bold", fontSize: 17 }]}>Eliminar</Text>
+                                                <Text style={styles.menuItemText}>Elimine la publicacion de manera permanente</Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                    ) : (
+                                        <></>
+                                    )
+                                ) : (
+                                    <></>
+                                )
+                            }
+                        </View>
+                    </View>
+                </Modal>
+                <Modal
+                    transparent={true}
+                    visible={modalDelete}
+                    onRequestClose={closeModal2}
+                    animationType="fade"
+                >
+                    <View style={styles.overlay}>
+                        <View style={{ backgroundColor: "white", borderRadius: 20, padding: 20, paddingTop: 30, paddingBottom: 30 }}>
+                            <View style={{ width: "100%", gap: 10 }}>
+                                <View style={{ borderBottomColor: "gray", borderBottomWidth: 1 }}>
+                                    <Text style={{ textAlign: "center", fontSize: 17, fontWeight: "bold" }}>¿Estas seguro que deseas eliminar esta publicación?</Text>
+                                    <Text style={{ textAlign: "center" }}>Esta publicación sera eliminado de manera permanente sin recuperacion alguna</Text>
                                 </View>
-                                <View>
-                                    <Text style={[styles.menuItemText, { fontWeight: "bold", fontSize: 17 }]}>Eliminar</Text>
-                                    <Text style={styles.menuItemText}>Elimine la publicacion de manera permanente</Text>
+                                <View style={{ flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center" }}>
+                                    <TouchableOpacity style={{ borderRightColor: "gray", borderRightWidth: 1 }} onPress={closeModal2}><Text style={{ color: "orange", textAlign: "center" }}>Cancelar</Text></TouchableOpacity>
+                                    <TouchableOpacity onPress={deletePost}><Text style={{ color: "orange" }}>Eliminar</Text></TouchableOpacity>
                                 </View>
-                            </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
                 </Modal>
@@ -151,20 +197,19 @@ const styles = StyleSheet.create({
     },
 
     overlay: {
+        padding: 10,
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0,0,0,0.2)',
-        padding: 0
+        backgroundColor: 'rgba(0,0,0,0.7)',
     },
 
     menuContainer: {
-        position: "absolute",
-        bottom: 0,
         backgroundColor: "white",
-        borderTopRightRadius: 20,
-        borderTopLeftRadius: 20,
-        padding: 15,
+        borderRadius: 20,
+        padding: 20,
+        paddingBottom: 40,
+        paddingTop: 40,
         gap: 15,
         width: "100%"
     },

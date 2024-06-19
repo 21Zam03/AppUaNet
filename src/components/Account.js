@@ -39,7 +39,10 @@ export default function Account() {
                         style={styles.imagen}
                     />
                 )}
-                <Text style={styles.texto}>{usuario ? usuario.fullname : ".........."}</Text>
+                <View>
+                    <Text style={styles.texto}>{usuario ? usuario.fullname : ".........."}</Text>
+                    <Text style={{color: "gray"}}>@{ usuario ? usuario.nickname : "......"}</Text>
+                </View>
             </View>
             <View style={styles.contenedorSecond}>
                 <View style={styles.child}>

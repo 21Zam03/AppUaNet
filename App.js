@@ -13,6 +13,7 @@ import SignUpCode from './src/components/SignUpCode';
 import SignUpPassword from './src/components/SignUpPassword';
 import SignUpCarreer from './src/components/SignUpCarreer';
 import SignUpLocation from './src/components/SignUpLocation';
+import SignUpNickname from './src/components/SignUpNickname';
 
 import { AuthProvider, useAuth } from './src/components/AuthContext';
 import Navegacion1 from './src/components/Navegation1';
@@ -46,6 +47,7 @@ const AppContent = () => {
           <AuthStack.Screen name="SignUpLocation" component={SignUpLocation} options={{ title: '', headerShown: true}} />
           <AuthStack.Screen name="SignUpEmail" component={SignUpEmail} options={{ title: '', headerShown: true}} />
           <AuthStack.Screen name="SignUpCode" component={SignUpCode} options={{ title: '', headerShown: true}} />
+          <AuthStack.Screen name="SignUpNickname" component={SignUpNickname} options={{ title: '', headerShown: true}} />
           <AuthStack.Screen name="SignUpPassword" component={SignUpPassword} options={{ title: '', headerShown: true}} />
         </AuthStack.Navigator>
       )}
