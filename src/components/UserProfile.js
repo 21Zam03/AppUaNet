@@ -5,11 +5,11 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { useRoute } from '@react-navigation/native';
+import TopBarPerfil from "./TopBarPerfil";
 
 export default function UserProfile() {
-    const [reloadComponent, setReloadComponent] = useState(false);
 
-    //Logica para el useNavigation
+    //Logica para dirigirse al editarPerfil con el useNavigation
     const navigation = useNavigation();
     const handlePress1 = () => {
         navigation.navigate('EditarPerfil')
@@ -28,6 +28,17 @@ export default function UserProfile() {
             .catch(error => {
                 console.error('Error al obtener al estudiante:', error);
             });
+    }, []);
+
+    //Logica para obtener el usuario del assynStorage
+    const { obtenerDatosUsuario } = useAuth();
+    const [studentTest, setStudentTest] = useState(null);
+    useEffect(() => {
+        const cargarDatosUsuario = async () => {
+            const datosUsuario = await obtenerDatosUsuario();
+            setStudentTest(datosUsuario);
+        };
+        cargarDatosUsuario();
     }, []);
 
     //Logica para ver el modal o no
@@ -49,23 +60,38 @@ export default function UserProfile() {
                     const totalLikes = sortedPosts.reduce((acc, post) => acc + post.likes.length, 0);
                     setLikesTotal(totalLikes);
                 } catch (error) {
-                    console.error('Error al obtener la lista de publicaciones:', error);
+                    console.error('Error al obtener la lista de publicaciones - userProfile:', error);
                 }
             };
             fetchPosts();
         }
     }, [student]); // Este useEffect depende del `usuario`
 
-    //Logica para obtener el usuario del assynStorage
-    const { obtenerDatosUsuario } = useAuth();
-    const [studentTest, setStudentTest] = useState(null);
+    //Logica para obtener si existe una relacion entre el student y studentTest
+    const [reloadComponent, setReloadComponent] = useState(false);
+    const [relationInfo, setRelationInfo] = useState();
+    const [relation, setRelation] = useState(false);
+    const [relation2, setRelation2] = useState(false);
     useEffect(() => {
-        const cargarDatosUsuario = async () => {
-            const datosUsuario = await obtenerDatosUsuario();
-            setStudentTest(datosUsuario);
-        };
-        cargarDatosUsuario();
-    }, []);
+        if (student) {
+            if (studentTest.idStudent != student.idStudent) {
+                const fetchPosts = async () => {
+                    try {
+                        const response = await axios.get(`http://192.168.1.39:9000/api/friends/listFriends/${studentTest.idStudent}/${student.idStudent}`);
+                        if (response.data.idFriend) {
+                            setRelation(true);
+                            setRelationInfo(response.data);
+                        } else {
+                            comprobacion();
+                        }
+                    } catch (error) {
+                        console.error('Error al obtener la lista de friends del usuario1:', error);
+                    }
+                };
+                fetchPosts();
+            }
+        }
+    }, [student, reloadComponent]);
 
     //Logica para el boton de enviar solicitud
     const [bontonSolicitud, setBotonSolicitud] = useState(false);
@@ -101,31 +127,6 @@ export default function UserProfile() {
         }
     }
 
-    //Lista de solicitudes de amistades enviadas
-    const [relationInfo, setRelationInfo] = useState();
-    const [relation, setRelation] = useState(false);
-    const [relation2, setRelation2] = useState(false);
-    useEffect(() => {
-        if (student) {
-            if (studentTest.idStudent != student.idStudent) {
-                const fetchPosts = async () => {
-                    try {
-                        const response = await axios.get(`http://192.168.1.39:9000/api/friends/listFriends/${studentTest.idStudent}/${student.idStudent}`);
-                        if (response.data.idFriend) {
-                            setRelation(true);
-                            setRelationInfo(response.data);
-                        } else {
-                            comprobacion();
-                        }
-                    } catch (error) {
-                        console.error('Error al obtener la lista de friends del usuario1:', error);
-                    }
-                };
-                fetchPosts();
-            }
-        }
-    }, [student, reloadComponent]);
-
     const comprobacion = async () => {
         try {
             const response = await axios.get(`http://192.168.1.39:9000/api/friends/listFriends/${student.idStudent}/${studentTest.idStudent}`);
@@ -138,9 +139,16 @@ export default function UserProfile() {
         }
     }
 
+    // useEffect(() => {
+    //     const calcularAmistades = async () => {
+
+    //     };
+    //     calcularAmistades();
+    // }, []);
+
     return (
-        <View style={styles.contenedor}>
-            <ScrollView>
+        <ScrollView>
+            <View style={styles.contenedor}>
                 <View style={styles.contenedorFotos}>
                     <View style={styles.contenedorImagen}>
                         {student && student.photo ? (
@@ -151,11 +159,17 @@ export default function UserProfile() {
                                         style={styles.imagen}
                                     />
                                 </TouchableOpacity>
-                                <TouchableOpacity>
-                                    <View style={{ position: "absolute", bottom: 0, right: 0, backgroundColor: "white", width: 32, height: 32, borderRadius: 50, justifyContent: "center", alignItems: "center" }}>
-                                        <Icon name="plus-circle" size={28} color="#7DB6F3" />
-                                    </View>
-                                </TouchableOpacity>
+                                {
+                                    student.idStudent === studentTest.idStudent ? (
+                                        <TouchableOpacity>
+                                            <View style={{ position: "absolute", bottom: 0, right: 0, backgroundColor: "white", width: 32, height: 32, borderRadius: 50, justifyContent: "center", alignItems: "center" }}>
+                                                <Icon name="plus-circle" size={28} color="#7DB6F3" />
+                                            </View>
+                                        </TouchableOpacity>
+                                    ) : (
+                                        <></>
+                                    )
+                                }
                             </View>
                         ) : (
                             <View>
@@ -281,110 +295,9 @@ export default function UserProfile() {
                         </View>
                     </Modal>
                 </View>
-                <View style={styles.contenedorInfo}>
-                    <View>
-                        <Text style={{ fontSize: 21, fontWeight: "bold" }}>Información</Text>
-                    </View>
-                    <View style={{ flexDirection: "row" }}>
-                        <View style={{ width: "10%", justifyContent: "center", alignItems: "center" }}>
-                            <Icon name="user" size={22} color="#4E5050" />
-                        </View>
-                        <View>
-                            <Text style={{ fontSize: 15 }}>{student ? student.fullname : 'Cargando...'}</Text>
-                        </View>
-                    </View>
-                    <View style={{ flexDirection: "row" }}>
-                        <View style={{ width: "10%", justifyContent: "center", alignItems: "center" }}>
-                            <Icon name="graduation-cap" size={22} color="#4E5050" />
-                        </View>
-                        <View>
-                            <Text style={{ fontSize: 15 }}>{student ? student.carreraProfesional : 'Cargando...'}</Text>
-                        </View>
-                    </View>
-                    <View style={{ flexDirection: "row" }}>
-                        <View style={{ width: "10%", justifyContent: "center", alignItems: "center" }}>
-                            <Icon name="map-marker" size={22} color="#4E5050" />
-                        </View>
-                        <View>
-                            <Text style={{ fontSize: 15 }}>{student ? student.distrito : 'Cargando...'}</Text>
-                        </View>
-                    </View>
-                    <View style={{ flexDirection: "row" }}>
-                        <View style={{ width: "10%", justifyContent: "center", alignItems: "center" }}>
-                            <Icon name="birthday-cake" size={22} color="#4E5050" />
-                        </View>
-                        <View>
-                            <Text style={{ fontSize: 15 }}>{student ? new Date(student.fecha_nacimiento).toLocaleDateString() : 'Cargando...'}</Text>
-                        </View>
-                    </View>
-                    <View style={{ flexDirection: "row" }}>
-                        <View style={{ width: "10%", justifyContent: "center", alignItems: "center" }}>
-                            <Icon name="mars" size={22} color="#4E5050" />
-                        </View>
-                        <View>
-                            <Text>{student ? student.genre : 'Cargando...'}</Text>
-                        </View>
-                    </View>
-                    <View style={{ flexDirection: "row" }}>
-                        <View style={{ width: "10%", justifyContent: "center", alignItems: "center" }}>
-                            <Icon name="envelope" size={22} color="#4E5050" />
-                        </View>
-                        <View>
-                            <Text>{student ? student.userDto.email : 'Cargando...'}</Text>
-                        </View>
-                    </View>
-                </View>
-                <View style={styles.contenedorInfo}>
-                    <View>
-                        <Text style={{ fontSize: 21, fontWeight: "bold" }}>Intereses Académicos</Text>
-                    </View>
-                    <View style={{ flexDirection: "row", flexWrap: 'wrap', justifyContent: 'flex-start', gap: 10 }}>
-                        {
-                            student ? (
-                                student.intereses.map((interest, index) => (
-                                    <View style={{ flexDirection: "row", backgroundColor: "#E9F0E5", padding: 10, borderRadius: 10, gap: 5 }} key={index}>
-                                        <View>
-                                            <Text style={{ fontSize: 15 }}>{interest}</Text>
-                                        </View>
-                                    </View>
-                                ))
-                            ) : (
-                                <></>
-                            )
-                        }
-                    </View>
-                </View>
-                <View style={styles.contenedorInfo}>
-                    <View>
-                        <Text style={{ fontSize: 21, fontWeight: "bold" }}>Hobbies</Text>
-                    </View>
-                    <View style={{ flexDirection: "row", flexWrap: 'wrap', justifyContent: 'flex-start', gap: 10 }}>
-                        {
-                            student ? (
-                                student.hobbies != null ? (
-                                    student.hobbies.map((hobbie, index) => (
-                                        <View style={{ flexDirection: "row", backgroundColor: "#E9F0E5", padding: 10, borderRadius: 10, gap: 5 }} key={index}>
-                                            <View>
-                                                <Text style={{ fontSize: 15 }}>{hobbie}</Text>
-                                            </View>
-                                        </View>
-                                    ))
-                                ) : (
-                                    <Text>No hay hobbies</Text>
-                                )
-                            ) : (
-                                <></>
-                            )
-                        }
-                    </View>
-                </View>
-                {/* <View>
-                    {listPost.map((post, index) => (
-                        <Post key={post.idPost || index} photo={post.photo} message={post.message} idStudent={post.idStudent} />
-                    ))}
-                </View> */}
-            </ScrollView>
-        </View>
+                {listPost ? <TopBarPerfil student={student} listPost={listPost} /> : <></>}
+            </View>
+        </ScrollView>
     );
 }
 
@@ -484,5 +397,5 @@ const styles = StyleSheet.create({
 
     textSolicitudSi: {
         color: "black", textAlign: "center"
-    }
+    },
 });
