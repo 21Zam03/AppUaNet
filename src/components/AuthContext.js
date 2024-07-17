@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
         };
 
         try {
-            const response = await axios.post('http://192.168.1.39:9000/api/users/login', credenciales, {
+            const response = await axios.post('http://192.168.1.35:9000/api/users/login', credenciales, {
                 withCredentials: true,
             });
 
