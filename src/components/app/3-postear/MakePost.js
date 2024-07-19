@@ -69,7 +69,7 @@ export default function MakePost() {
                     type: 'video/mp4',
                 });
             }
-            const response = await axios.post('http://192.168.1.35:9000/api/posts', formData, {
+            const response = await axios.post('http://192.168.253.48:9000/api/posts', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     withCredentials: true,

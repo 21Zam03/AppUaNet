@@ -11,7 +11,7 @@ const BottomSheetComponent = ({ idStudent, idStudentStorage, idPost, handleOutsi
     const closeModal2 = () => setModalDelete(false);
     const deletePost = async () => {
         try {
-            const response = await axios.delete(`http://192.168.1.35:9000/api/posts/${idPost}`);
+            const response = await axios.delete(`http://192.168.253.48:9000/api/posts/${idPost}`);
             if (response.data) {
                 closeModal2();
                 console.log("Publicacion eliminada: ", idPost);

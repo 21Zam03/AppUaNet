@@ -7,17 +7,14 @@ const AuthContext = createContext();
 
 // Crear un proveedor
 export const AuthProvider = ({ children }) => {
-
     const [autenticado, setAutenticado] = useState(false);
 
+    // Funciones para manejar la autenticación
     const handleLogin = async (email, password) => {
-        const credenciales = {
-            email: email,
-            password: password,
-        };
+        const credenciales = { email, password };
 
         try {
-            const response = await axios.post('http://192.168.1.35:9000/api/users/login', credenciales, {
+            const response = await axios.post('http://192.168.253.48:9000/api/users/login', credenciales, {
                 withCredentials: true,
             });
 
@@ -37,14 +34,6 @@ export const AuthProvider = ({ children }) => {
         eliminarToken();
     };
 
-    const value = {
-        autenticado,
-        handleLogin,
-        handleLogout,
-        obtenerDatosUsuario
-    };
-
-    // Datos Usuario
     const guardarDatosUsuario = async (usuario) => {
         try {
             await AsyncStorage.setItem('usuario', JSON.stringify(usuario));
@@ -53,7 +42,7 @@ export const AuthProvider = ({ children }) => {
             console.error('Error al guardar los datos del usuario:', error);
         }
     };
-    
+
     const obtenerDatosUsuario = async () => {
         try {
             const usuario = await AsyncStorage.getItem('usuario');
@@ -72,9 +61,9 @@ export const AuthProvider = ({ children }) => {
         } catch (error) {
             console.error('Error al eliminar los datos del usuario:', error);
         }
-    }
+    };
 
-    //Token
+    // Funciones para manejar el token
     const guardarToken = async (token) => {
         try {
             await AsyncStorage.setItem('token', JSON.stringify(token));
@@ -88,7 +77,7 @@ export const AuthProvider = ({ children }) => {
             const token = await AsyncStorage.getItem('token');
             return token != null ? JSON.parse(token) : null;
         } catch (error) {
-            console.error('Error al obtener los datos del usuario:', error);
+            console.error('Error al obtener el token:', error);
             return null;
         }
     };
@@ -100,10 +89,23 @@ export const AuthProvider = ({ children }) => {
         } catch (error) {
             console.error('Error al eliminar el token del usuario:', error);
         }
-    }
+    };
+
+    // Proporcionar valores al contexto
+    const value = {
+        autenticado,
+        handleLogin,
+        handleLogout,
+        obtenerDatosUsuario,
+        eliminarDatosUsuario,
+        guardarDatosUsuario,
+        guardarToken,
+        obtenerToken,
+        eliminarToken
+    };
 
     return (
-        <AuthContext.Provider value={{autenticado, handleLogin, handleLogout, obtenerDatosUsuario, eliminarDatosUsuario, guardarDatosUsuario}}>
+        <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
     );

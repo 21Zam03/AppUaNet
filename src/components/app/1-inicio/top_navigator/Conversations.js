@@ -10,7 +10,7 @@ export default function Conversations({ item, usuario }) {
     useEffect(() => {
         const loadPhoto = async () => {
             try {
-                const response = await axios.get(`http://192.168.1.35:9000/api/students/photo/${otherUserId}`, {
+                const response = await axios.get(`http://192.168.253.48:9000/api/students/photo/${otherUserId}`, {
                     responseType: "blob"
                 });
                 if (response.status === 200) {
@@ -41,7 +41,7 @@ export default function Conversations({ item, usuario }) {
     useEffect(() => {
         const getStudent = async () => {
             try {
-                const response = await axios.get(`http://192.168.1.35:9000/api/students/${otherUserId}`);
+                const response = await axios.get(`http://192.168.253.48:9000/api/students/${otherUserId}`);
                 setStudent(response.data);
             } catch (error) {
                 console.error('Error al obtener al estudiante:', error);

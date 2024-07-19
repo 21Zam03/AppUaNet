@@ -19,7 +19,7 @@ export default function ChatUser() {
     useEffect(() => {
         const getStudent = async () => {
             try {
-                const response = await axios.get(`http://192.168.1.35:9000/api/students/${idStudent}`);
+                const response = await axios.get(`http://192.168.253.48:9000/api/students/${idStudent}`);
                 setStudent(response.data);
             } catch (error) {
                 console.error('Error al obtener al estudiante:', error);
@@ -54,7 +54,7 @@ export default function ChatUser() {
         const fetchMessages = async () => {
             if (usuario != null) {
                 try {
-                    const response = await axios.get(`http://192.168.1.35:9000/api/messages/chat/${idChat}`);
+                    const response = await axios.get(`http://192.168.253.48:9000/api/messages/chat/${idChat}`);
                     if (isMounted) {
                         setMessages(response.data);
                     }
@@ -92,7 +92,7 @@ export default function ChatUser() {
                     createdAt: new Date()
                 }
                 try {
-                    const response = await axios.post(`http://192.168.1.35:9000/api/chats`, chatEntity);
+                    const response = await axios.post(`http://192.168.253.48:9000/api/chats`, chatEntity);
                 } catch (error) {
                     console.error('Error al enviar el mensaje:', error);
                 }
@@ -104,7 +104,7 @@ export default function ChatUser() {
                     createdAt: new Date()
                 }
                 try {
-                    const response = await axios.post(`http://192.168.1.35:9000/api/messages`, messageEntity);
+                    const response = await axios.post(`http://192.168.253.48:9000/api/messages`, messageEntity);
                 } catch (error) {
                     console.error('Error al enviar el mensaje:', error);
                 }

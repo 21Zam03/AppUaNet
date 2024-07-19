@@ -35,7 +35,7 @@ export default function UserPost() {
         if (loading || !hasMore) return;
         setLoading(true);
         try {
-            const response = await axios.get(`http://192.168.1.35:9000/api/posts/studentPageable/${idStudent}`, {
+            const response = await axios.get(`http://192.168.253.48:9000/api/posts/studentPageable/${idStudent}`, {
                 params: { page, size: size }
             });
             if (response.data.content.length > 0) {

@@ -47,7 +47,7 @@ export default function StudentSearch({ searchQuery }) {
     const [shuffledStudents, setShuffledStudents] = useState([]);
     useEffect(() => {
         // Realizar la petición Axios para obtener la lista de publicaciones
-        axios.get(`http://192.168.1.35:9000/api/students`)
+        axios.get(`http://192.168.253.48:9000/api/students`)
             .then(response => {
                 // Actualizar el estado con la lista de publicaciones recibidas
                 setListStudent(response.data)

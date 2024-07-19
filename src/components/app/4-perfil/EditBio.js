@@ -36,7 +36,7 @@ export default function EditBio() {
             formData.append('intereses', JSON.stringify(usuario.intereses));
             formData.append('hobbies', JSON.stringify(usuario.hobbies));
             formData.append('nickname', usuario.nickname);
-            const response = await axios.put('http://192.168.1.35:9000/api/students', formData,
+            const response = await axios.put('http://192.168.253.48:9000/api/students', formData,
                 {
                     headers: {
                         'Content-Type': 'multipart/form-data',

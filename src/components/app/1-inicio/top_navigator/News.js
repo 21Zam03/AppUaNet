@@ -9,7 +9,7 @@ export default function News () {
 
     // const fetchPosts = async () => {
     //     try {
-    //         const response = await axios.get('http://192.168.1.35:9000/api/posts');
+    //         const response = await axios.get('http://192.168.253.48:9000/api/posts');
     //         const sortedPosts = response.data.sort((a, b) => new Date(b.datePublished) - new Date(a.datePublished));
 
     //         const postsInformativo = sortedPosts.filter(post => post.tipo === "Informativo");

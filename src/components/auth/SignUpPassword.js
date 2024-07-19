@@ -51,7 +51,7 @@ export default function SignUpPassword() {
         };
 
         try {
-            const response = await axios.post('http://192.168.1.35:9000/api/users/signUp', SignUpDTO);
+            const response = await axios.post('http://192.168.253.48:9000/api/users/signUp', SignUpDTO);
             if (response.data) {
                 guardarDatosUsuario(response.data);
                 //navigation.navigate('Inicio');

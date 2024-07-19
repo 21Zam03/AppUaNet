@@ -34,7 +34,7 @@ export default function Home() {
         if (loading || !hasMore) return;
         setLoading(true);
         try {
-            const response = await axios.get(`http://192.168.1.35:9000/api/posts/allPageable?page=${page}&size=${size}`);
+            const response = await axios.get(`http://192.168.253.48:9000/api/posts/allPageable?page=${page}&size=${size}`);
             if (response.data.content.length > 0) {
                 setListPost(prevPosts => [...prevPosts, ...response.data.content]);
                 setHasMore(!response.data.last);

@@ -38,7 +38,7 @@ export default function UserHeader({idStudent, openOptions}) {
     useEffect(() => {
         const fetchLikes = async () => {
             try {
-                const response = await axios.get(`http://192.168.1.35:9000/api/posts/likes/${idStudent}`);
+                const response = await axios.get(`http://192.168.253.48:9000/api/posts/likes/${idStudent}`);
                 setLikesTotal(response.data);
             } catch (error) {
                 console.error('Error al obtener los likes:', error);
@@ -72,7 +72,7 @@ export default function UserHeader({idStudent, openOptions}) {
     useEffect(() => {
         const fetchPhoto = async () => {
             try {
-                const response = await axios.get(`http://192.168.1.35:9000/api/students/photo/${idStudent}`, {
+                const response = await axios.get(`http://192.168.253.48:9000/api/students/photo/${idStudent}`, {
                     responseType: "blob"
                 });
                 if (response.status === 200) {
@@ -96,7 +96,7 @@ export default function UserHeader({idStudent, openOptions}) {
     useEffect(() => {
         const fetchPhoto = async () => {
             try {
-                const response = await axios.get(`http://192.168.1.35:9000/api/students/nickAndBio/${idStudent}`);
+                const response = await axios.get(`http://192.168.253.48:9000/api/students/nickAndBio/${idStudent}`);
                 setBiografia(response.data.biografia);
                 setNickname(response.data.nickname);
             } catch (error) {
@@ -111,7 +111,7 @@ export default function UserHeader({idStudent, openOptions}) {
     useEffect(() => {
         const fetchPhoto = async () => {
             try {
-                const response = await axios.get(`http://192.168.1.35:9000/api/posts/countPosts/${idStudent}`);
+                const response = await axios.get(`http://192.168.253.48:9000/api/posts/countPosts/${idStudent}`);
                 setCantPosts(response.data);
             } catch (error) {
                 console.error('Error al obtener los datos:', error);
@@ -125,7 +125,7 @@ export default function UserHeader({idStudent, openOptions}) {
     useEffect(() => {
         const fetchFriends = async () => {
             try {
-                const response = await axios.get(`http://192.168.1.35:9000/api/friends/countFriends/${idStudent}`);
+                const response = await axios.get(`http://192.168.253.48:9000/api/friends/countFriends/${idStudent}`);
                 setCantFriends(response.data);
             } catch (error) {
                 console.error('Error al obtener los datos:', error);

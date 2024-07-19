@@ -15,9 +15,9 @@ const FriendshipStatus = ({ userId1, userId2 }) => {
 
     const fetchFriendStatus = async () => {
         try {
-            let response = await axios.get(`http://192.168.1.35:9000/api/friends/listFriends/${userId1}/${userId2}`);
+            let response = await axios.get(`http://192.168.253.48:9000/api/friends/listFriends/${userId1}/${userId2}`);
             if (response.data.idFriend === null) {
-                response = await axios.get(`http://192.168.1.35:9000/api/friends/listFriends/${userId2}/${userId1}`);
+                response = await axios.get(`http://192.168.253.48:9000/api/friends/listFriends/${userId2}/${userId1}`);
             }
             if (response.data && response.data.idFriend !== null) {
                 setFriendStatus(response.data);
@@ -37,7 +37,7 @@ const FriendshipStatus = ({ userId1, userId2 }) => {
                 userId2: userId2,
                 status: "Pendiente"
             };
-            await axios.post('http://192.168.1.35:9000/api/friends', friend);
+            await axios.post('http://192.168.253.48:9000/api/friends', friend);
             fetchFriendStatus();
         } catch (error) {
             console.error(error);
@@ -47,7 +47,7 @@ const FriendshipStatus = ({ userId1, userId2 }) => {
     const cancelFriendRequest = async (idFriend) => {
         setBotonSolicitud(!botonSolicitud)
         try {
-            await axios.delete(`http://192.168.1.35:9000/api/friends/${idFriend}`);
+            await axios.delete(`http://192.168.253.48:9000/api/friends/${idFriend}`);
             fetchFriendStatus();
         } catch (error) {
             console.error(error);
@@ -63,7 +63,7 @@ const FriendshipStatus = ({ userId1, userId2 }) => {
             status: "Aceptado"
         };
         try {
-            await axios.put('http://192.168.1.35:9000/api/friends', friend);
+            await axios.put('http://192.168.253.48:9000/api/friends', friend);
             fetchFriendStatus();
         } catch (error) {
             console.error(error);
@@ -73,7 +73,7 @@ const FriendshipStatus = ({ userId1, userId2 }) => {
     const rejectFriendRequest = async (idFriend) => {
         setModalVisible(false);
         try {
-            await axios.delete(`http://192.168.1.35:9000/api/friends/${idFriend}`);
+            await axios.delete(`http://192.168.253.48:9000/api/friends/${idFriend}`);
             fetchFriendStatus();
         } catch (error) {
             console.error(error);

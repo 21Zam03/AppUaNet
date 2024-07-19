@@ -13,7 +13,7 @@ export default function Comment({ usuario, idPost }) {
     useEffect(() => {
         const cargarListaComentarios = async () => {
             try {
-                const response = await axios.get(`http://192.168.1.35:9000/api/comments/post/${idPost}`);
+                const response = await axios.get(`http://192.168.253.48:9000/api/comments/post/${idPost}`);
                 if (response.data) {
                     setListComments(response.data);
                 }
@@ -34,7 +34,7 @@ export default function Comment({ usuario, idPost }) {
         };
 
         try {
-            const response = await axios.post('http://192.168.1.35:9000/api/comments', comentario, {
+            const response = await axios.post('http://192.168.253.48:9000/api/comments', comentario, {
                 withCredentials: true,
             });
 

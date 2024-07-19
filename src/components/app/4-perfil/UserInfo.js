@@ -7,7 +7,7 @@ export default function UserInfo({ idStudent }) {
 
     const [student, setStudent] = useState(null);
     useEffect(() => {
-        axios.get(`http://192.168.1.35:9000/api/students/${idStudent}`)
+        axios.get(`http://192.168.253.48:9000/api/students/${idStudent}`)
             .then(response => {
                 // Actualizar el estado con la lista de publicaciones recibidas
                 setStudent(response.data)

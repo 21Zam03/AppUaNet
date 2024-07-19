@@ -88,7 +88,7 @@ export default function Post({ idPost, message, photo, datePublished, idStudent,
             likes: listLikes
         }
         try {
-            const response = await axios.put("http://192.168.1.35:9000/api/posts/likes", likesDto);
+            const response = await axios.put("http://192.168.253.48:9000/api/posts/likes", likesDto);
             if (response.data.status === 200) {
                 console.log("se dio like");
             }
@@ -108,7 +108,7 @@ export default function Post({ idPost, message, photo, datePublished, idStudent,
 
     const [student, setStudent] = useState();
     useEffect(() => {
-        axios.get(`http://192.168.1.35:9000/api/students/${idStudent}`)
+        axios.get(`http://192.168.253.48:9000/api/students/${idStudent}`)
             .then(response => {
                 setStudent(response.data)
             })
@@ -152,7 +152,7 @@ export default function Post({ idPost, message, photo, datePublished, idStudent,
     useEffect(() => {
         const cargarListaComentarios = async () => {
             try {
-                const response = await axios.get(`http://192.168.1.35:9000/api/comments/post/${idPost}`);
+                const response = await axios.get(`http://192.168.253.48:9000/api/comments/post/${idPost}`);
                 if (response.data) {
                     setListComments(response.data);
                 }

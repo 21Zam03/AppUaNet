@@ -28,7 +28,7 @@ export default function Chats() {
         if (usuario != null) {
             const loadChats = async () => {
                 try {
-                    const response = await axios.get(`http://192.168.1.35:9000/api/chats/${usuario.idStudent}`);
+                    const response = await axios.get(`http://192.168.253.48:9000/api/chats/${usuario.idStudent}`);
                     setListChats(response.data);
                 } catch (error) {
                     console.error('Error al obtener al estudiante:', error);
